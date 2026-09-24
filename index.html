@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QBMS - Question Bank Management System</title>
+    <meta name="description" content="Advanced Question Bank Management System powered by KMP, Rabin-Karp, and Levenshtein Distance algorithms.">
+    <link rel="stylesheet" href="styles.css">
+    <!-- FontAwesome for crisp icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Background Ambient Orbs -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+
+    <!-- Login Authentication Portal Overlay -->
+    <div class="login-screen-overlay" id="loginScreen">
+        <div class="login-container">
+            <div class="login-header">
+                <div class="login-logo">
+                    <i class="fa-solid fa-brain"></i>
+                </div>
+                <h2>Question Bank Management</h2>
+                <p>KLH CSE • Team 23 • Portal Authentication</p>
+            </div>
+
+            <!-- Role Selector Tabs -->
+            <div class="login-role-tabs">
+                <button type="button" class="role-tab active" data-role="student" id="roleTabStudent">
+                    <i class="fa-solid fa-user-graduate"></i> Student Login
+                </button>
+                <button type="button" class="role-tab" data-role="admin" id="roleTabAdmin">
+                    <i class="fa-solid fa-user-shield"></i> Admin Login
+                </button>
+            </div>
+
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label id="loginInputLabel" for="loginIdInput" style="font-weight: 600; margin-bottom: 8px; display: block;">Student 10-Digit Roll Number:</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-id-card login-input-icon"></i>
+                        <input type="text" id="loginIdInput" class="form-control login-input" placeholder="e.g. 2520040001" required autocomplete="off">
+                    </div>
+                    <small id="loginHint" class="login-hint">Format: 10-digit Roll No starting with 25200 (e.g. 25200*****)</small>
+                </div>
+
+                <div id="loginErrorMsg" class="login-error-msg" style="display: none;"></div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-login" id="loginSubmitBtn">
+                    <i class="fa-solid fa-right-to-bracket"></i> <span id="loginBtnText">Login as Student</span>
+                </button>
+            </form>
+
+            <!-- 4 Sample IDs Section -->
+            <div class="sample-credentials-section">
+                <div class="sample-title">
+                    <i class="fa-solid fa-key"></i> Quick Sample Logins (Click to autofill)
+                </div>
+                <div class="sample-cards-grid">
+                    <div class="sample-card" data-id="2520040001" data-role="student" title="Click to login as Rahul Verma (Student)">
+                        <div class="sample-badge badge-student"><i class="fa-solid fa-user-graduate"></i> Student</div>
+                        <div class="sample-id">2520040001</div>
+                        <div class="sample-name">Rahul Verma (CSE)</div>
+                    </div>
+                    <div class="sample-card" data-id="2520040023" data-role="student" title="Click to login as Ananya Reddy (Student)">
+                        <div class="sample-badge badge-student"><i class="fa-solid fa-user-graduate"></i> Student</div>
+                        <div class="sample-id">2520040023</div>
+                        <div class="sample-name">Ananya Reddy (CSE)</div>
+                    </div>
+                    <div class="sample-card" data-id="EMP1001" data-role="admin" title="Click to login as Prof. Suresh Sharma (Admin)">
+                        <div class="sample-badge badge-admin"><i class="fa-solid fa-user-shield"></i> Admin</div>
+                        <div class="sample-id">EMP1001</div>
+                        <div class="sample-name">Prof. Suresh Sharma</div>
+                    </div>
+                    <div class="sample-card" data-id="EMP1024" data-role="admin" title="Click to login as Dr. Priya Varma (Admin)">
+                        <div class="sample-badge badge-admin"><i class="fa-solid fa-user-shield"></i> Admin</div>
+                        <div class="sample-id">EMP1024</div>
+                        <div class="sample-name">Dr. Priya Varma (DSA)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-layout" id="mainAppLayout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-brain"></i>
+                </div>
+                <div class="brand-info">
+                    <h1>QBMS Portal</h1>
+                    <span>DSA-3 Project</span>
+                </div>
+            </div>
+
+            <!-- User Profile Card in Sidebar -->
+            <div class="sidebar-user-card" id="sidebarUserCard">
+                <div class="sidebar-user-info">
+                    <div class="user-avatar-circle" id="userAvatarCircle">
+                        <i class="fa-solid fa-user-graduate" id="userAvatarIcon"></i>
+                    </div>
+                    <div class="user-details">
+                        <div class="user-display-name" id="userDisplayName">User</div>
+                        <div class="user-role-line">
+                            <span class="badge badge-student" id="userRoleBadge">Student</span>
+                            <span class="user-id-code" id="userIdCode">25200*****</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="logout-icon-btn" id="logoutBtn" title="Logout from QBMS">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+
+            <nav class="nav-menu">
+                <a class="nav-item active" data-view="dashboard">
+                    <i class="fa-solid fa-layer-group nav-icon"></i>
+                    <span>Question Bank</span>
+                    <span class="nav-badge" id="totalQuestionsBadge">0</span>
+                </a>
+                <a class="nav-item" data-view="documents">
+                    <i class="fa-solid fa-folder-open nav-icon"></i>
+                    <span>Question Documents</span>
+                    <span class="nav-badge" id="totalDocsBadge" style="background: #a855f7;">0</span>
+                </a>
+                <a class="nav-item" data-view="search-algorithms">
+                    <i class="fa-solid fa-microchip nav-icon"></i>
+                    <span>Searching Algorithms</span>
+                    <span class="nav-badge" style="background: linear-gradient(135deg, #6366f1, #ec4899); font-weight: 700;">ALL 4</span>
+                </a>
+                <div class="nav-sub-menu">
+                    <a class="nav-sub-item" data-view="kmp-search">
+                        <i class="fa-solid fa-bolt"></i> <span>KMP Search</span>
+                    </a>
+                    <a class="nav-sub-item" data-view="rabin-karp">
+                        <i class="fa-solid fa-fingerprint"></i> <span>Rabin-Karp</span>
+                    </a>
+                    <a class="nav-sub-item" data-view="fuzzy-search">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Fuzzy Search</span>
+                    </a>
+                </div>
+                <a class="nav-item" data-view="similarity">
+                    <i class="fa-solid fa-scale-balanced nav-icon"></i>
+                    <span>Similarity Check</span>
+                </a>
+                <a class="nav-item" data-view="duplicates">
+                    <i class="fa-solid fa-clone nav-icon"></i>
+                    <span>Duplicate Matrix</span>
+                </a>
+                <a class="nav-item" data-view="paper-generator">
+                    <i class="fa-solid fa-file-lines nav-icon"></i>
+                    <span>Paper Generator</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="team-tag">
+                    <span>KLH CSE • <strong>Team 23</strong></span>
+                </div>
+                <button class="theme-toggle-btn" id="themeToggle" title="Toggle Theme">
+                    <i class="fa-solid fa-sun" id="themeIcon"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Header & Stats -->
+            <header class="top-header">
+                <div class="page-title">
+                    <h2 id="pageHeading">Question Bank Management</h2>
+                    <p id="pageSubHeading">Store and organize sets of questions into individual structured documents</p>
+                </div>
+
+                <!-- MAIN GLOBAL FUZZY SEARCH BAR -->
+                <div class="global-fuzzy-search-wrap" id="globalFuzzySearchWrap">
+                    <div class="global-fuzzy-input-box">
+                        <i class="fa-solid fa-wand-magic-sparkles fuzzy-icon-magic"></i>
+                        <input type="text" id="globalFuzzySearchInput" placeholder="Fuzzy Search questions (e.g. 'binry serch', 'deadlok', 'dijksta')..." autocomplete="off">
+                        <div class="fuzzy-badge-pill" title="Levenshtein Dynamic Programming Fuzzy Algorithm">
+                            <i class="fa-solid fa-bolt"></i> Fuzzy DP
+                        </div>
+                        <span class="search-kbd-shortcut" title="Press / or Ctrl+K to search"><kbd>/</kbd></span>
+                        <button class="fuzzy-clear-btn" id="globalFuzzyClearBtn" style="display: none;" title="Clear search">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <!-- Real-Time Fuzzy Results Dropdown Overlay -->
+                    <div class="global-fuzzy-dropdown" id="globalFuzzyDropdown" style="display: none;">
+                        <div class="fuzzy-dropdown-header">
+                            <div>
+                                <span class="fuzzy-dropdown-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Live Fuzzy Search</span>
+                                <span class="fuzzy-dropdown-subtitle" id="globalFuzzyCount">0 matching questions found</span>
+                            </div>
+                            <div class="fuzzy-dropdown-meta">
+                                <span class="badge badge-unit"><i class="fa-solid fa-code"></i> Levenshtein Distance</span>
+                            </div>
+                        </div>
+                        <div class="fuzzy-dropdown-results" id="globalFuzzyResultsList">
+                            <!-- Populated dynamically -->
+                        </div>
+                        <div class="fuzzy-dropdown-footer">
+                            <span><i class="fa-solid fa-circle-info"></i> Tolerates spelling errors, character swaps & typos</span>
+                            <button class="btn btn-secondary btn-sm" id="fuzzyGoToAlgosBtn">
+                                <i class="fa-solid fa-microchip"></i> Open Algorithms Hub
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="header-actions">
+                    <div class="doc-selector-wrap" title="Active Question Document">
+                        <span class="doc-selector-label"><i class="fa-solid fa-file-lines" style="color: #a855f7;"></i> Active Doc:</span>
+                        <select class="doc-selector-select" id="activeDocSelect">
+                            <option value="all">-- All Documents / Global --</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-secondary" id="exportActiveDocBtn" title="Export current document as a single file">
+                        <i class="fa-solid fa-file-arrow-down"></i> Export Doc
+                    </button>
+                    <button class="btn btn-secondary" id="importDocBtn" title="Import a question document file">
+                        <i class="fa-solid fa-file-arrow-up"></i> Import Doc
+                    </button>
+                    <button class="btn btn-primary" id="openAddModalBtn">
+                        <i class="fa-solid fa-plus"></i> Add Question
+                    </button>
+                </div>
+            </header>
+
+            <!-- Metrics Overview Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <span>Total Questions</span>
+                        <h3 id="statTotalQuestions">0</h3>
+                    </div>
+                    <div class="stat-icon-wrapper" style="color: #6366f1;">
+                        <i class="fa-solid fa-database"></i>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <span>Distinct Subjects</span>
+                        <h3 id="statTotalSubjects">0</h3>
+                    </div>
+                    <div class="stat-icon-wrapper" style="color: #06b6d4;">
+                        <i class="fa-solid fa-book-open"></i>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <span>Duplicates Found</span>
+                        <h3 id="statDuplicateCount">0</h3>
+                    </div>
+                    <div class="stat-icon-wrapper" style="color: #ef4444;">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <span>Difficulty Split (E/M/H)</span>
+                        <h3 id="statDifficultySplit">0 / 0 / 0</h3>
+                    </div>
+                    <div class="stat-icon-wrapper" style="color: #10b981;">
+                        <i class="fa-solid fa-chart-pie"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 1: QUESTION BANK (DASHBOARD) -->
+            <section class="view-panel active" id="view-dashboard">
+                <!-- Filter & Search Controls -->
+                <div class="control-bar">
+                    <div class="table-search-group">
+                        <div class="search-box">
+                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                            <input type="text" id="quickSearchInput" placeholder="Quick search questions or keywords...">
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-sm fuzzy-table-toggle active" id="tableFuzzyToggle" title="Toggle Fuzzy Matching on quick search">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Fuzzy Match: ON</span>
+                        </button>
+                    </div>
+                    <div class="filter-group">
+                        <select class="select-custom" id="filterDoc">
+                            <option value="">All Documents</option>
+                        </select>
+                        <select class="select-custom" id="filterSubject">
+                            <option value="">All Subjects</option>
+                        </select>
+                        <select class="select-custom" id="filterUnit">
+                            <option value="">All Units</option>
+                            <option value="1">Unit 1</option>
+                            <option value="2">Unit 2</option>
+                            <option value="3">Unit 3</option>
+                            <option value="4">Unit 4</option>
+                            <option value="5">Unit 5</option>
+                        </select>
+                        <select class="select-custom" id="filterDifficulty">
+                            <option value="">All Difficulties</option>
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                        <button class="btn btn-secondary btn-sm" id="clearFiltersBtn">
+                            <i class="fa-solid fa-xmark"></i> Clear
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Questions Table -->
+                <div class="table-container">
+                    <table class="data-table" id="questionsTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 65px;">ID</th>
+                                <th>Question Text</th>
+                                <th>Document / Set</th>
+                                <th>Subject</th>
+                                <th>Unit</th>
+                                <th>Difficulty</th>
+                                <th>Year</th>
+                                <th style="width: 130px; text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="questionsTableBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- VIEW: QUESTION DOCUMENTS & SETS -->
+            <section class="view-panel" id="view-documents">
+                <div class="algo-card">
+                    <div class="algo-header">
+                        <div class="algo-header-title">
+                            <h3>Question Documents & Sets Repository</h3>
+                            <p>Organize, save, and export sets of questions stored in individual unified documents.</p>
+                        </div>
+                        <div class="header-actions">
+                            <button class="btn btn-secondary" id="openImportModalBtn">
+                                <i class="fa-solid fa-file-arrow-up"></i> Import Document File
+                            </button>
+                            <button class="btn btn-primary" id="openCreateDocBtn">
+                                <i class="fa-solid fa-folder-plus"></i> Create New Document
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="documentsListGrid" class="doc-grid">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: SEARCHING ALGORITHMS SHOWCASE HUB & BENCHMARK ARENA -->
+            <section class="view-panel" id="view-search-algorithms">
+                <div class="algo-card">
+                    <!-- Hub Hero Banner -->
+                    <div class="hub-hero-banner">
+                        <div class="hub-hero-content">
+                            <div class="hub-badge-row">
+                                <span class="badge badge-doc"><i class="fa-solid fa-graduation-cap"></i> DSA-3 Lab Implementation</span>
+                                <span class="badge badge-subject"><i class="fa-solid fa-microchip"></i> 4 Searching Algorithms</span>
+                                <span class="badge badge-easy"><i class="fa-solid fa-bolt"></i> Live Benchmark Arena</span>
+                            </div>
+                            <h2>Searching Algorithms Implementation Hub</h2>
+                            <p>Interactive playground, real-time benchmarks, preprocessing table inspectors, and dynamic programming matrices for all 4 searching algorithms.</p>
+                        </div>
+                        <div class="hub-algo-tags-grid">
+                            <div class="algo-pill-card">
+                                <div class="pill-icon" style="color: #6366f1;"><i class="fa-solid fa-bolt"></i></div>
+                                <div>
+                                    <div class="pill-name">Knuth-Morris-Pratt</div>
+                                    <div class="pill-meta">Time: O(N+M) | LPS Array</div>
+                                </div>
+                            </div>
+                            <div class="algo-pill-card">
+                                <div class="pill-icon" style="color: #a855f7;"><i class="fa-solid fa-fingerprint"></i></div>
+                                <div>
+                                    <div class="pill-name">Rabin-Karp Rolling Hash</div>
+                                    <div class="pill-meta">Avg: O(N+M) | d=256, q=101</div>
+                                </div>
+                            </div>
+                            <div class="algo-pill-card">
+                                <div class="pill-icon" style="color: #ec4899;"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                                <div>
+                                    <div class="pill-name">Levenshtein Fuzzy Search</div>
+                                    <div class="pill-meta">O(N×M) DP | Typo Tolerant</div>
+                                </div>
+                            </div>
+                            <div class="algo-pill-card">
+                                <div class="pill-icon" style="color: #06b6d4;"><i class="fa-solid fa-forward-fast"></i></div>
+                                <div>
+                                    <div class="pill-name">Boyer-Moore-Horspool</div>
+                                    <div class="pill-meta">Best: O(N/M) | Bad Char Skip</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hub Tab Switcher -->
+                    <div class="hub-tab-bar">
+                        <button type="button" class="hub-tab active" data-hub-tab="arena">
+                            <i class="fa-solid fa-chart-line"></i> Multi-Algorithm Benchmark Arena
+                        </button>
+                        <button type="button" class="hub-tab" data-hub-tab="kmp">
+                            <i class="fa-solid fa-bolt"></i> KMP Deep-Dive
+                        </button>
+                        <button type="button" class="hub-tab" data-hub-tab="rabinkarp">
+                            <i class="fa-solid fa-fingerprint"></i> Rabin-Karp Deep-Dive
+                        </button>
+                        <button type="button" class="hub-tab" data-hub-tab="fuzzy">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Fuzzy Levenshtein DP
+                        </button>
+                        <button type="button" class="hub-tab" data-hub-tab="boyermoore">
+                            <i class="fa-solid fa-forward-fast"></i> Boyer-Moore Deep-Dive
+                        </button>
+                        <button type="button" class="hub-tab" data-hub-tab="theory">
+                            <i class="fa-solid fa-table-cells"></i> Complexity Matrix & Java Code
+                        </button>
+                    </div>
+
+                    <!-- HUB TAB 1: MULTI-ALGORITHM BENCHMARK ARENA -->
+                    <div class="hub-tab-pane active" id="hub-pane-arena">
+                        <div class="benchmark-control-box">
+                            <div class="form-grid" style="margin-bottom: 14px;">
+                                <div class="form-group" style="flex: 2;">
+                                    <label for="hubBenchmarkInput" style="font-weight: 600;"><i class="fa-solid fa-magnifying-glass"></i> Search Query / Pattern:</label>
+                                    <input type="text" class="form-control" id="hubBenchmarkInput" placeholder="Enter keyword or question topic (e.g. Binary Search, Deadlock, Sort, Tree)..." value="Binary Search">
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label for="hubBenchmarkScope" style="font-weight: 600;"><i class="fa-solid fa-folder-tree"></i> Search Scope:</label>
+                                    <select class="select-custom form-control" id="hubBenchmarkScope">
+                                        <option value="active">Active Document Questions</option>
+                                        <option value="all" selected>All Repository Questions (Global)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label for="hubBenchmarkDist" style="font-weight: 600;">Fuzzy Max Edit Dist: <span id="hubBenchmarkDistVal" style="color: var(--accent-primary); font-weight: bold;">4</span></label>
+                                    <input type="range" min="1" max="10" value="4" id="hubBenchmarkDist" style="cursor: pointer; margin-top: 8px;">
+                                </div>
+                            </div>
+
+                            <!-- Sample Query Chips -->
+                            <div class="quick-chip-row">
+                                <span class="chip-label">Quick Test Keywords:</span>
+                                <button type="button" class="query-chip" data-query="Binary Search">Binary Search</button>
+                                <button type="button" class="query-chip" data-query="Deadlock Avoidance">Deadlock Avoidance</button>
+                                <button type="button" class="query-chip" data-query="Bubble Sort">Bubble Sort</button>
+                                <button type="button" class="query-chip" data-query="Dijkstra">Dijkstra</button>
+                                <button type="button" class="query-chip" data-query="Relational Algebra">Relational Algebra</button>
+                                <button type="button" class="query-chip" data-query="TCP Handshake">TCP Handshake</button>
+                                <button type="button" class="query-chip chip-typo" data-query="binry serch">Typo: "binry serch"</button>
+                                <button type="button" class="query-chip chip-typo" data-query="deadlok">Typo: "deadlok"</button>
+                            </div>
+
+                            <div style="margin-top: 16px; display: flex; gap: 12px; align-items: center;">
+                                <button type="button" class="btn btn-primary" id="hubRunBenchmarkBtn" style="padding: 12px 24px; font-size: 1rem;">
+                                    <i class="fa-solid fa-play"></i> Benchmark All 4 Algorithms
+                                </button>
+                                <span style="font-size: 0.85rem; color: var(--text-muted);">Executes KMP, Rabin-Karp, Boyer-Moore, and Levenshtein DP in parallel</span>
+                            </div>
+                        </div>
+
+                        <!-- 4 Algorithm Performance Cards -->
+                        <div class="benchmark-cards-grid" id="hubBenchmarkCards">
+                            <!-- Populated dynamically -->
+                        </div>
+
+                        <!-- Matches Breakdown Table -->
+                        <div style="margin-top: 28px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <h4 style="color: var(--text-primary); font-weight: 700;">
+                                    <i class="fa-solid fa-list-check" style="color: var(--accent-primary);"></i> Consolidated Search Matches Across Algorithms
+                                </h4>
+                                <span id="hubMatchesSummaryCount" class="badge badge-doc">0 Questions Matched</span>
+                            </div>
+                            <div id="hubBenchmarkResultsList">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HUB TAB 2: KMP DEEP-DIVE -->
+                    <div class="hub-tab-pane" id="hub-pane-kmp">
+                        <div class="deep-dive-card">
+                            <div class="algo-header">
+                                <div class="algo-header-title">
+                                    <h3>Knuth-Morris-Pratt (KMP) Algorithm Inspector</h3>
+                                    <p>Computes Longest Prefix Suffix (LPS / $\pi$) preprocessing table to avoid redundant character backtracking.</p>
+                                </div>
+                                <span class="algo-tag">Time: O(N + M) | Space: O(M)</span>
+                            </div>
+
+                            <div class="form-grid">
+                                <div class="form-group full-width">
+                                    <label for="hubKmpInput">Search Pattern / Keyword:</label>
+                                    <div style="display: flex; gap: 12px;">
+                                        <input type="text" class="form-control" id="hubKmpInput" placeholder="e.g. ABABCABAB, Binary Search, Sort..." value="Binary Search">
+                                        <button class="btn btn-primary" id="hubKmpRunBtn">
+                                            <i class="fa-solid fa-bolt"></i> Inspect KMP & LPS
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="visualizer-box" id="hubKmpLpsBox" style="margin-top: 18px;">
+                                <div class="visualizer-title">
+                                    <i class="fa-solid fa-table-list"></i> Computed $\pi$ / LPS (Longest Prefix Suffix) Array:
+                                </div>
+                                <div class="array-display" id="hubKmpLpsDisplay"></div>
+                                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 10px;">
+                                    Each cell <code>LPS[i]</code> stores the length of the longest proper prefix of <code>Pattern[0...i]</code> that is also a suffix of <code>Pattern[0...i]</code>.
+                                </p>
+                            </div>
+
+                            <div style="margin-top: 24px;">
+                                <h4 style="margin-bottom: 12px; color: var(--text-secondary);">KMP Matches in Repository:</h4>
+                                <div id="hubKmpResultsList"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HUB TAB 3: RABIN-KARP DEEP-DIVE -->
+                    <div class="hub-tab-pane" id="hub-pane-rabinkarp">
+                        <div class="deep-dive-card">
+                            <div class="algo-header">
+                                <div class="algo-header-title">
+                                    <h3>Rabin-Karp Rolling Hash Inspector</h3>
+                                    <p>Computes modular polynomial rolling hash ($d=256$, prime $q=101$) in $O(1)$ per sliding window.</p>
+                                </div>
+                                <span class="algo-tag">Avg: O(N + M) | Hash Modulo: 101</span>
+                            </div>
+
+                            <div class="form-grid">
+                                <div class="form-group full-width">
+                                    <label for="hubRkInput">Search Pattern / Keyword:</label>
+                                    <div style="display: flex; gap: 12px;">
+                                        <input type="text" class="form-control" id="hubRkInput" placeholder="e.g. Binary, Deadlock, Sort..." value="Deadlock">
+                                        <button class="btn btn-primary" id="hubRkRunBtn">
+                                            <i class="fa-solid fa-fingerprint"></i> Inspect Rolling Hash
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="visualizer-box" id="hubRkHashBox" style="margin-top: 18px;">
+                                <div class="visualizer-title">
+                                    <i class="fa-solid fa-hashtag"></i> Polynomial Hash Diagnostics ($d=256, q=101$):
+                                </div>
+                                <div id="hubRkHashDiagnostics"></div>
+                            </div>
+
+                            <div style="margin-top: 24px;">
+                                <h4 style="margin-bottom: 12px; color: var(--text-secondary);">Rabin-Karp Search Matches & Rolling Window Status:</h4>
+                                <div id="hubRkResultsList"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HUB TAB 4: FUZZY LEVENSHTEIN DP MATRIX DEEP-DIVE -->
+                    <div class="hub-tab-pane" id="hub-pane-fuzzy">
+                        <div class="deep-dive-card">
+                            <div class="algo-header">
+                                <div class="algo-header-title">
+                                    <h3>Levenshtein Distance Dynamic Programming Matrix Inspector</h3>
+                                    <p>Full 2D Dynamic Programming cost table $DP[i][j]$ with Insertion, Deletion, and Substitution operations.</p>
+                                </div>
+                                <span class="algo-tag">O(N × M) DP Matrix | Typo Tolerant</span>
+                            </div>
+
+                            <div class="form-grid" style="margin-bottom: 16px;">
+                                <div class="form-group" style="flex: 1;">
+                                    <label for="hubFuzzyString1">Input Query (String 1 - Can have typos):</label>
+                                    <input type="text" class="form-control" id="hubFuzzyString1" placeholder="e.g. binry serch, algorthm" value="binry">
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label for="hubFuzzyString2">Target Word / Text (String 2):</label>
+                                    <input type="text" class="form-control" id="hubFuzzyString2" placeholder="e.g. binary, algorithm" value="binary">
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 12px; margin-bottom: 18px;">
+                                <button class="btn btn-primary" id="hubFuzzyRunBtn">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Compute 2D DP Matrix & Similarity
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="hubFuzzySampleBtn">
+                                    <i class="fa-solid fa-shuffle"></i> Load Sample Pair
+                                </button>
+                            </div>
+
+                            <!-- 2D DP Matrix Visualizer Box -->
+                            <div class="visualizer-box" id="hubFuzzyMatrixBox">
+                                <div class="visualizer-title" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span><i class="fa-solid fa-table-cells"></i> 2D Levenshtein DP Cost Matrix:</span>
+                                    <span id="hubFuzzyDistanceBadge" class="badge badge-easy">Edit Distance: 1</span>
+                                </div>
+                                <div class="dp-matrix-wrapper" id="hubFuzzyMatrixDisplay">
+                                    <!-- Dynamic 2D Table -->
+                                </div>
+                                <div class="dp-legend-row" style="margin-top: 12px;">
+                                    <span class="legend-item"><span class="legend-box match"></span> Exact Match ($Cost = 0$)</span>
+                                    <span class="legend-item"><span class="legend-box sub"></span> Substitution / Edit ($Cost + 1$)</span>
+                                    <span class="legend-item"><span class="legend-box final"></span> Final Edit Distance $DP[|S_1|][|S_2|]$</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HUB TAB 5: BOYER-MOORE DEEP-DIVE -->
+                    <div class="hub-tab-pane" id="hub-pane-boyermoore">
+                        <div class="deep-dive-card">
+                            <div class="algo-header">
+                                <div class="algo-header-title">
+                                    <h3>Boyer-Moore-Horspool Bad Character Skip Inspector</h3>
+                                    <p>Scans pattern right-to-left and utilizes Bad Character Table $\Delta_1$ for sublinear skips across the question bank.</p>
+                                </div>
+                                <span class="algo-tag">Best: O(N / M) | Right-to-Left Matching</span>
+                            </div>
+
+                            <div class="form-grid">
+                                <div class="form-group full-width">
+                                    <label for="hubBmInput">Search Pattern / Keyword:</label>
+                                    <div style="display: flex; gap: 12px;">
+                                        <input type="text" class="form-control" id="hubBmInput" placeholder="e.g. Algorithm, Routing, Search..." value="Algorithm">
+                                        <button class="btn btn-primary" id="hubBmRunBtn">
+                                            <i class="fa-solid fa-forward-fast"></i> Inspect Bad Character Table
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="visualizer-box" id="hubBmTableBox" style="margin-top: 18px;">
+                                <div class="visualizer-title">
+                                    <i class="fa-solid fa-table-columns"></i> Bad Character Shift Table ($\Delta_1 = M - 1 - i$):
+                                </div>
+                                <div class="array-display" id="hubBmTableDisplay"></div>
+                            </div>
+
+                            <div style="margin-top: 24px;">
+                                <h4 style="margin-bottom: 12px; color: var(--text-secondary);">Boyer-Moore-Horspool Matches in Repository:</h4>
+                                <div id="hubBmResultsList"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HUB TAB 6: THEORETICAL COMPLEXITY & JAVA CODE -->
+                    <div class="hub-tab-pane" id="hub-pane-theory">
+                        <div class="deep-dive-card">
+                            <h3 style="margin-bottom: 16px; color: var(--text-primary);"><i class="fa-solid fa-scale-balanced" style="color: var(--accent-primary);"></i> Academic Comparison Matrix of Implemented Searching Algorithms</h3>
+                            <div class="table-container" style="margin-bottom: 28px;">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Algorithm</th>
+                                            <th>Preprocessing</th>
+                                            <th>Best Time</th>
+                                            <th>Average Time</th>
+                                            <th>Worst Time</th>
+                                            <th>Space Complexity</th>
+                                            <th>Key Mechanism</th>
+                                            <th>Typo Tolerant</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong style="color: #6366f1;">Knuth-Morris-Pratt (KMP)</strong></td>
+                                            <td>$O(M)$</td>
+                                            <td>$O(N)$</td>
+                                            <td>$O(N + M)$</td>
+                                            <td>$O(N + M)$</td>
+                                            <td>$O(M)$ (LPS Array)</td>
+                                            <td>Prefix Function $\pi$ eliminates backtracking</td>
+                                            <td><span class="badge badge-hard">No (Exact)</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong style="color: #a855f7;">Rabin-Karp Rolling Hash</strong></td>
+                                            <td>$O(M)$</td>
+                                            <td>$O(N + M)$</td>
+                                            <td>$O(N + M)$</td>
+                                            <td>$O(N \times M)$ (hash collisions)</td>
+                                            <td>$O(1)$</td>
+                                            <td>Polynomial Hash ($d=256, q=101$) with rolling update</td>
+                                            <td><span class="badge badge-hard">No (Exact)</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong style="color: #06b6d4;">Boyer-Moore-Horspool</strong></td>
+                                            <td>$O(M + \Sigma)$</td>
+                                            <td>$O(N / M)$</td>
+                                            <td>$O(N)$</td>
+                                            <td>$O(N \times M)$</td>
+                                            <td>$O(\Sigma)$ (Bad Char Table)</td>
+                                            <td>Right-to-left scan with sublinear bad character skip</td>
+                                            <td><span class="badge badge-hard">No (Exact)</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong style="color: #ec4899;">Levenshtein Fuzzy Search</strong></td>
+                                            <td>None / $O(1)$</td>
+                                            <td>$O(N \times M)$</td>
+                                            <td>$O(N \times M)$</td>
+                                            <td>$O(N \times M)$</td>
+                                            <td>$O(N \times M)$ or $O(\min(N,M))$</td>
+                                            <td>Dynamic Programming Edit Distance (Ins/Del/Sub)</td>
+                                            <td><span class="badge badge-easy">Yes (Fuzzy)</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h3 style="margin-bottom: 16px; color: var(--text-primary);"><i class="fa-solid fa-code" style="color: #10b981;"></i> Java Backend DSA-3 Source Implementations</h3>
+                            <div class="code-preview-grid">
+                                <div class="code-preview-card">
+                                    <div class="code-preview-header">
+                                        <span><i class="fa-brands fa-java" style="color: #f59e0b;"></i> KMP.java</span>
+                                        <span class="badge badge-unit">O(N+M)</span>
+                                    </div>
+                                    <pre class="code-block"><code>public class KMP {
+    public static boolean search(String text, String pattern) {
+        if (pattern == null || pattern.isEmpty()) return true;
+        if (text == null || text.isEmpty()) return false;
+        String txt = text.toLowerCase();
+        String pat = pattern.toLowerCase();
+        int N = txt.length(), M = pat.length();
+        int[] lps = computeLPSArray(pat);
+        int i = 0, j = 0;
+        while (i < N) {
+            if (pat.charAt(j) == txt.charAt(i)) { j++; i++; }
+            if (j == M) return true;
+            else if (i < N && pat.charAt(j) != txt.charAt(i)) {
+                if (j != 0) j = lps[j - 1];
+                else i = i + 1;
+            }
+        }
+        return false;
+    }
+}</code></pre>
+                                </div>
+
+                                <div class="code-preview-card">
+                                    <div class="code-preview-header">
+                                        <span><i class="fa-brands fa-java" style="color: #f59e0b;"></i> RabinKarp.java</span>
+                                        <span class="badge badge-unit">d=256, q=101</span>
+                                    </div>
+                                    <pre class="code-block"><code>public class RabinKarp {
+    private static final int d = 256;
+    private static final int q = 101;
+    public static boolean search(String text, String pattern) {
+        int M = pattern.length(), N = text.length();
+        if (N < M) return false;
+        int p = 0, t = 0, h = 1;
+        for (int i = 0; i < M - 1; i++) h = (h * d) % q;
+        for (int i = 0; i < M; i++) {
+            p = (d * p + pattern.charAt(i)) % q;
+            t = (d * t + text.charAt(i)) % q;
+        }
+        for (int i = 0; i <= N - M; i++) {
+            if (p == t && text.substring(i, i + M).equals(pattern)) return true;
+            if (i < N - M) {
+                t = (d * (t - text.charAt(i) * h) + text.charAt(i + M)) % q;
+                if (t < 0) t += q;
+            }
+        }
+        return false;
+    }
+}</code></pre>
+                                </div>
+
+                                <div class="code-preview-card">
+                                    <div class="code-preview-header">
+                                        <span><i class="fa-brands fa-java" style="color: #f59e0b;"></i> Levenshtein.java</span>
+                                        <span class="badge badge-unit">DP Distance</span>
+                                    </div>
+                                    <pre class="code-block"><code>public class Levenshtein {
+    public static int distance(String s1, String s2) {
+        int[][] dp = new int[s1.length() + 1][s2.length() + 1];
+        for (int i = 0; i <= s1.length(); i++) dp[i][0] = i;
+        for (int j = 0; j <= s2.length(); j++) dp[0][j] = j;
+        for (int i = 1; i <= s1.length(); i++) {
+            for (int j = 1; j <= s2.length(); j++) {
+                if (s1.charAt(i - 1) == s2.charAt(j - 1))
+                    dp[i][j] = dp[i - 1][j - 1];
+                else
+                    dp[i][j] = 1 + Math.min(dp[i - 1][j - 1],
+                                   Math.min(dp[i - 1][j], dp[i][j - 1]));
+            }
+        }
+        return dp[s1.length()][s2.length()];
+    }
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 2: KMP SEARCH -->
+            <section class="view-panel" id="view-kmp-search">
+                <div class="algo-card">
+                    <div class="algo-header">
+                        <div class="algo-header-title">
+                            <h3>Knuth-Morris-Pratt (KMP) Pattern Search</h3>
+                            <p>Fast substring search using Longest Prefix Suffix (LPS / $\pi$) preprocessing table.</p>
+                        </div>
+                        <span class="algo-tag">Time: O(N + M) | Space: O(M)</span>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label for="kmpKeyword">Search Pattern / Keyword:</label>
+                            <div style="display: flex; gap: 12px;">
+                                <input type="text" class="form-control" id="kmpKeyword" placeholder="e.g. Binary Search, Tree, Sort...">
+                                <button class="btn btn-primary" id="kmpSearchBtn">
+                                    <i class="fa-solid fa-bolt"></i> Run KMP
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="kmpLpsContainer" class="visualizer-box" style="display: none;">
+                        <div class="visualizer-title">
+                            <i class="fa-solid fa-table-list"></i> Computed LPS Array (Prefix Function Table)
+                        </div>
+                        <div class="array-display" id="kmpLpsDisplay"></div>
+                    </div>
+
+                    <div id="kmpResultsContainer" style="margin-top: 24px;">
+                        <h4 style="margin-bottom: 12px; color: var(--text-secondary);">Search Matches</h4>
+                        <div id="kmpResultsList"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 3: RABIN-KARP SEARCH -->
+            <section class="view-panel" id="view-rabin-karp">
+                <div class="algo-card">
+                    <div class="algo-header">
+                        <div class="algo-header-title">
+                            <h3>Rabin-Karp Rolling Hash Search</h3>
+                            <p>Searches patterns using modular polynomial rolling hash ($d=256$, $q=101$).</p>
+                        </div>
+                        <span class="algo-tag">Avg: O(N + M) | Hash Mod: 101</span>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label for="rkKeyword">Search Pattern / Keyword:</label>
+                            <div style="display: flex; gap: 12px;">
+                                <input type="text" class="form-control" id="rkKeyword" placeholder="e.g. Binary, Complexity, Sort...">
+                                <button class="btn btn-primary" id="rkSearchBtn">
+                                    <i class="fa-solid fa-fingerprint"></i> Run Rabin-Karp
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="rkHashContainer" class="visualizer-box" style="display: none;">
+                        <div class="visualizer-title">
+                            <i class="fa-solid fa-hashtag"></i> Pattern Hash Info
+                        </div>
+                        <p id="rkHashText" style="font-family: var(--font-mono); font-size: 0.9rem; color: #a855f7;"></p>
+                    </div>
+
+                    <div id="rkResultsContainer" style="margin-top: 24px;">
+                        <h4 style="margin-bottom: 12px; color: var(--text-secondary);">Search Matches & Rolling Window Trace</h4>
+                        <div id="rkResultsList"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 4: FUZZY SEARCH (LEVENSHTEIN) -->
+            <section class="view-panel" id="view-fuzzy-search">
+                <div class="algo-card">
+                    <div class="algo-header">
+                        <div class="algo-header-title">
+                            <h3>Fuzzy Search (Levenshtein Distance)</h3>
+                            <p>Matches questions even with typos, spelling errors, and syntactic variations.</p>
+                        </div>
+                        <span class="algo-tag">Edit Distance (Insert, Delete, Replace)</span>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group" style="flex: 2;">
+                            <label for="fuzzyQuery">Search Query (can include typos):</label>
+                            <input type="text" class="form-control" id="fuzzyQuery" placeholder="e.g. Binry Serch, buble srt, compkexity">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="fuzzyThreshold">Max Edit Distance Threshold: <span id="fuzzyThresholdVal" style="color: var(--accent-primary); font-weight: bold;">5</span></label>
+                            <input type="range" min="1" max="15" value="5" id="fuzzyThreshold" style="margin-top: 8px; cursor: pointer;">
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 8px;">
+                        <button class="btn btn-primary" id="fuzzySearchBtn">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Perform Fuzzy Search
+                        </button>
+                    </div>
+
+                    <div id="fuzzyResultsContainer" style="margin-top: 24px;">
+                        <h4 style="margin-bottom: 12px; color: var(--text-secondary);">Fuzzy Matches & Similarity Rankings</h4>
+                        <div id="fuzzyResultsList"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 5: QUESTION SIMILARITY -->
+            <section class="view-panel" id="view-similarity">
+                <div class="algo-card">
+                    <div class="algo-header">
+                        <div class="algo-header-title">
+                            <h3>Pairwise Question Similarity Checker</h3>
+                            <p>Compare two questions side-by-side to assess semantic overlap and duplicate risk.</p>
+                        </div>
+                        <span class="algo-tag">Levenshtein Ratio & Word Diff</span>
+                    </div>
+
+                    <!-- Searchable Question Selection Columns -->
+                    <div class="sim-columns-grid">
+                        <!-- Question 1 Search & Selector Column -->
+                        <div class="sim-column-card">
+                            <div class="sim-column-header">
+                                <span class="sim-column-title"><i class="fa-solid fa-file-circle-question" style="color: #6366f1;"></i> Question 1</span>
+                                <span class="badge badge-doc" id="simCountBadge1">0 Questions</span>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 10px;">
+                                <label for="simSearch1"><i class="fa-solid fa-magnifying-glass"></i> Search Question 1:</label>
+                                <div style="position: relative;">
+                                    <input type="text" id="simSearch1" class="form-control" placeholder="Search keyword, ID (#1), unit, topic..." style="padding-left: 36px;" autocomplete="off">
+                                    <i class="fa-solid fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.85rem; pointer-events: none;"></i>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                                <select class="select-custom form-control" id="simSubject1" style="flex: 1; font-size: 0.82rem; padding: 8px 12px;">
+                                    <option value="">All Subjects</option>
+                                </select>
+                                <button type="button" class="btn btn-secondary" id="simClearSearch1" title="Clear Question 1 Search" style="padding: 0 12px; font-size: 0.85rem;">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 12px;">
+                                <label for="simSelect1">Filtered Question List (Click to Select):</label>
+                                <select class="select-custom form-control" id="simSelect1" size="4" style="height: 115px; font-size: 0.85rem;">
+                                    <option value="">-- Choose First Question --</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="simCustom1">Question 1 Text (or Type Custom Question):</label>
+                                <textarea class="form-control" id="simCustom1" rows="3" placeholder="Type or select question text 1..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Question 2 Search & Selector Column -->
+                        <div class="sim-column-card">
+                            <div class="sim-column-header">
+                                <span class="sim-column-title"><i class="fa-solid fa-file-circle-question" style="color: #ec4899;"></i> Question 2</span>
+                                <span class="badge badge-doc" id="simCountBadge2">0 Questions</span>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 10px;">
+                                <label for="simSearch2"><i class="fa-solid fa-magnifying-glass"></i> Search Question 2:</label>
+                                <div style="position: relative;">
+                                    <input type="text" id="simSearch2" class="form-control" placeholder="Search keyword, ID (#2), unit, topic..." style="padding-left: 36px;" autocomplete="off">
+                                    <i class="fa-solid fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.85rem; pointer-events: none;"></i>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                                <select class="select-custom form-control" id="simSubject2" style="flex: 1; font-size: 0.82rem; padding: 8px 12px;">
+                                    <option value="">All Subjects</option>
+                                </select>
+                                <button type="button" class="btn btn-secondary" id="simClearSearch2" title="Clear Question 2 Search" style="padding: 0 12px; font-size: 0.85rem;">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 12px;">
+                                <label for="simSelect2">Filtered Question List (Click to Select):</label>
+                                <select class="select-custom form-control" id="simSelect2" size="4" style="height: 115px; font-size: 0.85rem;">
+                                    <option value="">-- Choose Second Question --</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="simCustom2">Question 2 Text (or Type Custom Question):</label>
+                                <textarea class="form-control" id="simCustom2" rows="3" placeholder="Type or select question text 2..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Toolbar Actions -->
+                    <div style="display: flex; gap: 12px; margin-top: 18px; flex-wrap: wrap; align-items: center;">
+                        <button class="btn btn-primary" id="compareSimilarityBtn">
+                            <i class="fa-solid fa-scale-balanced"></i> Calculate Similarity
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="simSwapBtn" title="Swap Question 1 and Question 2">
+                            <i class="fa-solid fa-right-left"></i> Swap Questions
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="simRandomBtn" title="Pick Random Question Pair">
+                            <i class="fa-solid fa-shuffle"></i> Random Pair
+                        </button>
+                    </div>
+
+                    <div id="similarityResultBox" style="display: none; margin-top: 24px;">
+                        <div style="display: flex; gap: 24px; align-items: center; justify-content: center; flex-wrap: wrap;">
+                            <div class="meter-card" style="min-width: 200px;">
+                                <div class="gauge-circle" id="simGauge">
+                                    <div class="gauge-inner">
+                                        <div class="score" id="simPercentScore">0%</div>
+                                        <div class="label">Similarity</div>
+                                    </div>
+                                </div>
+                                <div id="simVerdictBadge"></div>
+                                <span id="simEditDistanceInfo" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;"></span>
+                            </div>
+
+                            <div style="flex: 1; min-width: 320px;">
+                                <div class="compare-container">
+                                    <div class="question-box">
+                                        <h4><span>Question 1</span></h4>
+                                        <p id="diffText1"></p>
+                                    </div>
+                                    <div class="question-box">
+                                        <h4><span>Question 2</span></h4>
+                                        <p id="diffText2"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 6: DUPLICATE MATRIX -->
+            <section class="view-panel" id="view-duplicates">
+                <div class="algo-card">
+                    <div class="algo-header">
+                        <div class="algo-header-title">
+                            <h3>Full Repository Duplicate Detection Matrix</h3>
+                            <p>Performs $O(N^2)$ pairwise similarity analysis across all questions in the bank.</p>
+                        </div>
+                        <span class="algo-tag">Automated Scan</span>
+                    </div>
+
+                    <div class="control-bar" style="margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; gap: 16px; flex: 1; min-width: 280px;">
+                            <label for="dupThresholdSlider" style="font-weight: 600; white-space: nowrap;">
+                                Similarity Threshold: <span id="dupThresholdLabel" style="color: #ef4444; font-weight: bold;">60%</span>
+                            </label>
+                            <input type="range" id="dupThresholdSlider" min="10" max="100" value="60" style="flex: 1; cursor: pointer;">
+                        </div>
+                        <button class="btn btn-primary" id="runDuplicateScanBtn">
+                            <i class="fa-solid fa-radar"></i> Run Detection Scan
+                        </button>
+                    </div>
+
+                    <div id="duplicateMatrixResults">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 7: QUESTION PAPER GENERATOR -->
+            <section class="view-panel" id="view-paper-generator">
+                <div class="algo-card">
+                    <div class="algo-header">
+                        <div class="algo-header-title">
+                            <h3>Exam Question Paper Generator</h3>
+                            <p>Generate clean, printable question papers partitioned by unit and difficulty.</p>
+                        </div>
+                        <div class="header-actions">
+                            <button class="btn btn-secondary" onclick="window.print()">
+                                <i class="fa-solid fa-print"></i> Print / Save PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="control-bar">
+                        <div class="filter-group">
+                            <label style="font-weight: 600;">Paper Title:</label>
+                            <input type="text" class="form-control" id="paperTitleInput" value="Data Structures & Algorithms - End Semester Exam" style="width: 320px;">
+                            <select class="select-custom" id="paperSubjectSelect">
+                                <option value="">All Subjects</option>
+                            </select>
+                            <button class="btn btn-primary btn-sm" id="generatePaperBtn">
+                                <i class="fa-solid fa-arrows-rotate"></i> Refresh Paper
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Printable Container -->
+                    <div class="paper-preview" id="paperPreviewArea">
+                        <div class="paper-header">
+                            <h2 id="paperExamTitle">Data Structures & Algorithms - End Semester Exam</h2>
+                            <p style="font-style: italic; margin-top: 4px;">Department of Computer Science & Engineering</p>
+                            <div class="paper-meta">
+                                <span>Max Marks: 100</span>
+                                <span id="paperSubjectMeta">Subject: All</span>
+                                <span>Duration: 3 Hours</span>
+                            </div>
+                        </div>
+
+                        <div id="paperSectionsContainer">
+                            <!-- Questions categorized -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL: ADD / EDIT QUESTION -->
+    <div class="modal-overlay" id="questionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Add New Question</h3>
+                <button class="modal-close" id="modalCloseBtn">&times;</button>
+            </div>
+            <form id="questionForm">
+                <input type="hidden" id="editQuestionId">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="formDocument">Assign to Document / Question Set *</label>
+                        <select class="select-custom form-control" id="formDocument" required>
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="formQuestionText">Question Text *</label>
+                        <textarea class="form-control" id="formQuestionText" required placeholder="Enter full question description..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="formSubject">Subject *</label>
+                        <input type="text" class="form-control" id="formSubject" required placeholder="e.g. DSA, DBMS, OS">
+                    </div>
+                    <div class="form-group">
+                        <label for="formUnit">Unit (>= 1) *</label>
+                        <input type="number" class="form-control" id="formUnit" min="1" max="10" value="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="formDifficulty">Difficulty *</label>
+                        <select class="select-custom form-control" id="formDifficulty" required>
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="formYear">Year (1900-2100) *</label>
+                        <input type="number" class="form-control" id="formYear" min="1900" max="2100" value="2026" required>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" id="modalCancelBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="saveQuestionBtn">
+                        <i class="fa-solid fa-check"></i> Save Question
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CREATE / EDIT DOCUMENT -->
+    <div class="modal-overlay" id="docModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="docModalTitle">Create Question Document</h3>
+                <button class="modal-close" id="docModalCloseBtn">&times;</button>
+            </div>
+            <form id="docForm">
+                <input type="hidden" id="editDocId">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="docFormTitle">Document Title *</label>
+                        <input type="text" class="form-control" id="docFormTitle" required placeholder="e.g. DSA Mid-Sem Exam Set A">
+                    </div>
+                    <div class="form-group">
+                        <label for="docFormSubject">Subject / Course *</label>
+                        <input type="text" class="form-control" id="docFormSubject" required placeholder="e.g. Data Structures & Algorithms">
+                    </div>
+                    <div class="form-group">
+                        <label for="docFormCode">Course Code</label>
+                        <input type="text" class="form-control" id="docFormCode" placeholder="e.g. 23CS201">
+                    </div>
+                    <div class="form-group">
+                        <label for="docFormYear">Academic Year *</label>
+                        <input type="number" class="form-control" id="docFormYear" min="1900" max="2100" value="2026" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="docFormMaxMarks">Max Marks</label>
+                        <input type="number" class="form-control" id="docFormMaxMarks" min="10" max="200" value="100">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="docFormDesc">Description / Instructions</label>
+                        <textarea class="form-control" id="docFormDesc" rows="2" placeholder="e.g. Contains 5 questions covering Units 1-4. Answer all questions."></textarea>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" id="docModalCancelBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="saveDocBtn">
+                        <i class="fa-solid fa-folder-check"></i> Save Document
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: EXPORT DOCUMENT -->
+    <div class="modal-overlay" id="exportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Export Question Document</h3>
+                <button class="modal-close" id="exportModalCloseBtn">&times;</button>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                    Save the entire set of questions stored in <strong id="exportDocName" style="color: var(--accent-primary);">Selected Document</strong> into a single standalone document file:
+                </p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                    <button class="btn btn-secondary" style="flex-direction: column; padding: 20px 14px; gap: 10px;" id="exportJsonBtn">
+                        <i class="fa-solid fa-code" style="font-size: 1.8rem; color: #a855f7;"></i>
+                        <span style="font-weight: 700;">JSON Document</span>
+                        <span style="font-size: 0.72rem; color: var(--text-muted);">Full Structured Data</span>
+                    </button>
+                    <button class="btn btn-secondary" style="flex-direction: column; padding: 20px 14px; gap: 10px;" id="exportWordBtn">
+                        <i class="fa-solid fa-file-word" style="font-size: 1.8rem; color: #3b82f6;"></i>
+                        <span style="font-weight: 700;">Word Document</span>
+                        <span style="font-size: 0.72rem; color: var(--text-muted);">Formatted .DOC File</span>
+                    </button>
+                    <button class="btn btn-secondary" style="flex-direction: column; padding: 20px 14px; gap: 10px;" id="exportTextBtn">
+                        <i class="fa-solid fa-file-lines" style="font-size: 1.8rem; color: #10b981;"></i>
+                        <span style="font-weight: 700;">Text / Markdown</span>
+                        <span style="font-size: 0.72rem; color: var(--text-muted);">Clean Formatted .TXT</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: IMPORT DOCUMENT -->
+    <div class="modal-overlay" id="importModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Import Question Document</h3>
+                <button class="modal-close" id="importModalCloseBtn">&times;</button>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <p style="color: var(--text-secondary); margin-bottom: 14px;">
+                    Upload a Question Document file (`.json`) to load and store its complete set of questions in the system:
+                </p>
+                <label class="file-dropzone" for="importFileInput" style="display: block;">
+                    <i class="fa-solid fa-cloud-arrow-up" style="font-size: 2.2rem; color: var(--accent-primary); margin-bottom: 8px;"></i>
+                    <p style="font-weight: 600;">Click to browse or drop a `.json` Question Document file</p>
+                    <span style="font-size: 0.78rem; color: var(--text-muted);">Supported: QBMS Document Packages (.json)</span>
+                    <input type="file" id="importFileInput" accept=".json" style="display: none;">
+                </label>
+                <div style="margin-top: 16px;">
+                    <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">Or paste raw JSON document:</label>
+                    <textarea class="form-control" id="importPasteJson" rows="4" placeholder="Paste QBMS document JSON content here..."></textarea>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                <button type="button" class="btn btn-secondary" id="importCancelBtn">Cancel</button>
+                <button type="button" class="btn btn-primary" id="importExecuteBtn">
+                    <i class="fa-solid fa-file-import"></i> Import Document
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Scripts -->
+    <script src="algorithms.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

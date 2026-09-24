@@ -1,0 +1,103 @@
+{
+  "documentMetadata": {
+    "title": "Database Management Systems Question Bank 2026 - Comprehensive Set",
+    "subject": "DBMS",
+    "code": "23CS203",
+    "year": 2026,
+    "maxMarks": 100,
+    "description": "Complete question set covering Relational Data Model, ER Diagrams, Relational Algebra, Complex SQL Queries, Normalization (1NF to BCNF), Transaction Processing (ACID), Concurrency Control, and B+ Tree Indexing."
+  },
+  "questions": [
+    {
+      "question": "Explain the Three-Schema Architecture of DBMS and describe Data Independence (Physical and Logical).",
+      "subject": "DBMS",
+      "unit": 1,
+      "difficulty": "Easy",
+      "year": 2026
+    },
+    {
+      "question": "Design an Entity-Relationship (ER) diagram for an Online University Examination System showing entities, attributes, primary keys, and cardinality ratios.",
+      "subject": "DBMS",
+      "unit": 1,
+      "difficulty": "Medium",
+      "year": 2025
+    },
+    {
+      "question": "Explain Relational Algebra fundamental operations (Select, Project, Cartesian Product, Set Union, Set Difference, and Rename) with syntax and examples.",
+      "subject": "DBMS",
+      "unit": 2,
+      "difficulty": "Medium",
+      "year": 2026
+    },
+    {
+      "question": "Write complex SQL queries utilizing GROUP BY, HAVING, subqueries, and nested correlated subqueries for a given Employee-Department database schema.",
+      "subject": "DBMS",
+      "unit": 2,
+      "difficulty": "Hard",
+      "year": 2025
+    },
+    {
+      "question": "Explain Functional Dependencies, Armstrong's Axioms, and how to compute the attribute closure of a given set of attributes.",
+      "subject": "DBMS",
+      "unit": 3,
+      "difficulty": "Medium",
+      "year": 2026
+    },
+    {
+      "question": "Discuss Normalization forms (1NF, 2NF, 3NF, and BCNF) with examples and illustrate Lossless Join Decomposition and Dependency Preservation.",
+      "subject": "DBMS",
+      "unit": 3,
+      "difficulty": "Hard",
+      "year": 2025
+    },
+    {
+      "question": "Given a relation R(A, B, C, D, E) and functional dependencies F = {A->BC, CD->E, B->D, E->A}, determine the candidate keys and the highest normal form.",
+      "subject": "DBMS",
+      "unit": 3,
+      "difficulty": "Hard",
+      "year": 2026
+    },
+    {
+      "question": "Explain ACID properties of Transactions and state transition lifecycle of a transaction.",
+      "subject": "DBMS",
+      "unit": 4,
+      "difficulty": "Easy",
+      "year": 2026
+    },
+    {
+      "question": "What is Serializability? Explain Conflict Serializability and precedence graph testing with an example schedule.",
+      "subject": "DBMS",
+      "unit": 4,
+      "difficulty": "Hard",
+      "year": 2025
+    },
+    {
+      "question": "Explain Two-Phase Locking (2PL) protocols (Strict 2PL, Rigorous 2PL) and discuss how they prevent concurrency anomalies.",
+      "subject": "DBMS",
+      "unit": 4,
+      "difficulty": "Medium",
+      "year": 2026
+    },
+    {
+      "question": "Construct a B+ Tree of order 4 by inserting and deleting a given set of keys, and explain why B+ trees are preferred for database indexing over binary search trees.",
+      "subject": "DBMS",
+      "unit": 5,
+      "difficulty": "Hard",
+      "year": 2026
+    },
+    {
+      "question": "Compare Primary Index, Secondary Index, and Clustering Index with clear architectural diagrams.",
+      "subject": "DBMS",
+      "unit": 5,
+      "difficulty": "Easy",
+      "year": 2025
+    },
+    {
+      "question": "Explain Log-Based Recovery techniques (Deferred Database Modification and Immediate Database Modification) and Checkpointing.",
+      "subject": "DBMS",
+      "unit": 5,
+      "difficulty": "Medium",
+      "year": 2026
+    }
+  ]
+}

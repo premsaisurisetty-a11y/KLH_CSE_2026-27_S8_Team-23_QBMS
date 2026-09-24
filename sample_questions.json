@@ -1,0 +1,96 @@
+{
+  "documentMetadata": {
+    "title": "DSA Question Bank 2026 - Comprehensive Set",
+    "subject": "DSA",
+    "code": "23CS201",
+    "year": 2026,
+    "maxMarks": 100,
+    "description": "Comprehensive question set covering Arrays, Searching, Sorting, Trees, Graph Algorithms, Dynamic Programming, and String Matching algorithms."
+  },
+  "questions": [
+    {
+      "question": "Explain the working and complexity analysis of Binary Search with an example.",
+      "subject": "DSA",
+      "unit": 1,
+      "difficulty": "Easy",
+      "year": 2026
+    },
+    {
+      "question": "Compare Linear Search and Binary Search in terms of time and space complexity.",
+      "subject": "DSA",
+      "unit": 1,
+      "difficulty": "Easy",
+      "year": 2025
+    },
+    {
+      "question": "Explain Binary Search Tree (BST) insertion, deletion, and search operations with diagrams.",
+      "subject": "DSA",
+      "unit": 2,
+      "difficulty": "Medium",
+      "year": 2026
+    },
+    {
+      "question": "Construct an AVL tree by inserting the given elements and explain the rotation techniques used.",
+      "subject": "DSA",
+      "unit": 2,
+      "difficulty": "Hard",
+      "year": 2025
+    },
+    {
+      "question": "Explain the working and implementation of Merge Sort using Divide and Conquer strategy.",
+      "subject": "DSA",
+      "unit": 3,
+      "difficulty": "Medium",
+      "year": 2026
+    },
+    {
+      "question": "Discuss Quick Sort algorithm with partitioning logic and analyze best, average, and worst-case time complexities.",
+      "subject": "DSA",
+      "unit": 3,
+      "difficulty": "Hard",
+      "year": 2024
+    },
+    {
+      "question": "Explain Knuth-Morris-Pratt (KMP) string matching algorithm with the construction of the Longest Prefix Suffix (LPS) array.",
+      "subject": "DSA",
+      "unit": 4,
+      "difficulty": "Hard",
+      "year": 2026
+    },
+    {
+      "question": "Describe Rabin-Karp pattern matching algorithm using rolling hash technique and discuss spurious hits.",
+      "subject": "DSA",
+      "unit": 4,
+      "difficulty": "Medium",
+      "year": 2025
+    },
+    {
+      "question": "What is Levenshtein Distance (Edit Distance)? Formulate the dynamic programming recurrence relation.",
+      "subject": "DSA",
+      "unit": 4,
+      "difficulty": "Medium",
+      "year": 2026
+    },
+    {
+      "question": "Explain Dijkstra's single-source shortest path algorithm on weighted graphs with an example.",
+      "subject": "DSA",
+      "unit": 5,
+      "difficulty": "Hard",
+      "year": 2025
+    },
+    {
+      "question": "Explain Breadth First Search (BFS) and Depth First Search (DFS) graph traversal techniques.",
+      "subject": "DSA",
+      "unit": 5,
+      "difficulty": "Easy",
+      "year": 2026
+    },
+    {
+      "question": "Discuss 0/1 Knapsack problem using Dynamic Programming approach and derive its state transition equation.",
+      "subject": "DSA",
+      "unit": 5,
+      "difficulty": "Hard",
+      "year": 2025
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "documentMetadata": {
+    "title": "Computer Networks Question Bank 2026 - Comprehensive Set",
+    "subject": "Computer Networks",
+    "code": "23CS204",
+    "year": 2026,
+    "maxMarks": 100,
+    "description": "Comprehensive question bank covering OSI & TCP/IP Reference Models, Data Link Layer, Sliding Window Protocols, Network Layer IP Addressing & Subnetting, Routing Algorithms, Transport Layer TCP/UDP & Congestion Control, and Application Layer Protocols."
+  },
+  "questions": [
+    {
+      "question": "Compare the 7-Layer OSI Reference Model with the 4-Layer TCP/IP Protocol Suite, detailing the functions and protocols of each layer.",
+      "subject": "Computer Networks",
+      "unit": 1,
+      "difficulty": "Easy",
+      "year": 2026
+    },
+    {
+      "question": "Explain transmission media characteristics: Twisted Pair, Coaxial Cable, and Optical Fiber, along with Guided vs Unguided transmission.",
+      "subject": "Computer Networks",
+      "unit": 1,
+      "difficulty": "Easy",
+      "year": 2025
+    },
+    {
+      "question": "Explain Sliding Window Flow Control protocols: Stop-and-Wait ARQ, Go-Back-N (GBN) ARQ, and Selective Repeat (SR) ARQ with sender/receiver window sizes.",
+      "subject": "Computer Networks",
+      "unit": 2,
+      "difficulty": "Hard",
+      "year": 2026
+    },
+    {
+      "question": "Describe Cyclic Redundancy Check (CRC) error detection technique with an example of polynomial division for given data bitstream and generator polynomial.",
+      "subject": "Computer Networks",
+      "unit": 2,
+      "difficulty": "Medium",
+      "year": 2025
+    },
+    {
+      "question": "Explain CSMA/CD (Carrier Sense Multiple Access with Collision Detection) and CSMA/CA protocol mechanisms and backoff algorithm.",
+      "subject": "Computer Networks",
+      "unit": 2,
+      "difficulty": "Medium",
+      "year": 2026
+    },
+    {
+      "question": "Given an IPv4 address block 192.168.10.0/24, design a subnetting scheme to support 4 subnets with specific host requirements using Variable Length Subnet Masking (VLSM).",
+      "subject": "Computer Networks",
+      "unit": 3,
+      "difficulty": "Hard",
+      "year": 2026
+    },
+    {
+      "question": "Explain Distance Vector Routing Algorithm using Bellman-Ford algorithm and discuss the Count-to-Infinity problem along with its solutions.",
+      "subject": "Computer Networks",
+      "unit": 3,
+      "difficulty": "Hard",
+      "year": 2025
+    },
+    {
+      "question": "Describe Link State Routing Algorithm and compute shortest paths for a given network topology using Dijkstra's Algorithm.",
+      "subject": "Computer Networks",
+      "unit": 3,
+      "difficulty": "Medium",
+      "year": 2026
+    },
+    {
+      "question": "Explain TCP 3-Way Handshake Connection Establishment and 4-Way Connection Termination with sequence numbers and flags (SYN, ACK, FIN).",
+      "subject": "Computer Networks",
+      "unit": 4,
+      "difficulty": "Medium",
+      "year": 2026
+    },
+    {
+      "question": "Differentiate between TCP and UDP in terms of header format, connection state, reliability, and use-case applications.",
+      "subject": "Computer Networks",
+      "unit": 4,
+      "difficulty": "Easy",
+      "year": 2025
+    },
+    {
+      "question": "Explain TCP Congestion Control mechanisms: Slow Start, Congestion Avoidance, Fast Retransmit, and Fast Recovery (AIMD).",
+      "subject": "Computer Networks",
+      "unit": 4,
+      "difficulty": "Hard",
+      "year": 2026
+    },
+    {
+      "question": "Explain Domain Name System (DNS) hierarchy, resolution process (Iterative vs Recursive queries), and DNS record types (A, AAAA, CNAME, MX).",
+      "subject": "Computer Networks",
+      "unit": 5,
+      "difficulty": "Medium",
+      "year": 2026
+    },
+    {
+      "question": "Discuss HTTP/1.1 vs HTTP/2 vs HTTP/3 protocols, highlighting persistent connections, multiplexing, and QUIC protocol advantages.",
+      "subject": "Computer Networks",
+      "unit": 5,
+      "difficulty": "Medium",
+      "year": 2025
+    }
+  ]
+}

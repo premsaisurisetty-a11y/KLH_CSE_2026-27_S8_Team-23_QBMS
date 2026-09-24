@@ -85,11 +85,27 @@ public class Main {
     }
 
     static void addSampleQuestions() {
+        // DSA Questions
         questions.add(new Question(nextId++, "Explain the working of Binary Search.", "DSA", 1, "Easy", 2024));
         questions.add(new Question(nextId++, "Explain Binary Search Tree and its operations.", "DSA", 2, "Medium", 2025));
         questions.add(new Question(nextId++, "Explain the working of Bubble Sort.", "DSA", 3, "Easy", 2023));
         questions.add(new Question(nextId++, "What is the time complexity of Merge Sort?", "DSA", 4, "Medium", 2024));
         questions.add(new Question(nextId++, "Describe how Binary Search works.", "DSA", 1, "Easy", 2026));
+
+        // Operating Systems Questions
+        questions.add(new Question(nextId++, "Explain Process Control Block (PCB) and process state transition diagram.", "Operating Systems", 1, "Easy", 2026));
+        questions.add(new Question(nextId++, "Explain Peterson's algorithm for critical section problem and verify mutual exclusion.", "Operating Systems", 2, "Hard", 2025));
+        questions.add(new Question(nextId++, "Explain Banker's Algorithm for deadlock avoidance with safety algorithm steps.", "Operating Systems", 3, "Hard", 2026));
+
+        // DBMS Questions
+        questions.add(new Question(nextId++, "Explain Three-Schema Architecture and Physical/Logical Data Independence.", "DBMS", 1, "Easy", 2026));
+        questions.add(new Question(nextId++, "Discuss Normalization forms (1NF, 2NF, 3NF, BCNF) and Lossless Join Decomposition.", "DBMS", 3, "Hard", 2025));
+        questions.add(new Question(nextId++, "Construct a B+ Tree of order 4 and explain why B+ trees are preferred for indexing.", "DBMS", 5, "Hard", 2026));
+
+        // Computer Networks Questions
+        questions.add(new Question(nextId++, "Compare 7-Layer OSI Reference Model with 4-Layer TCP/IP Protocol Suite.", "Computer Networks", 1, "Easy", 2026));
+        questions.add(new Question(nextId++, "Explain Sliding Window Flow Control: Stop-and-Wait, Go-Back-N, and Selective Repeat ARQ.", "Computer Networks", 2, "Hard", 2026));
+        questions.add(new Question(nextId++, "Explain Distance Vector Routing Algorithm using Bellman-Ford and Count-to-Infinity problem.", "Computer Networks", 3, "Hard", 2025));
     }
 
     static void viewQuestions() {
@@ -222,24 +238,61 @@ public class Main {
         }
     }
 
-    static void similarityCheck() {
-        int id1 = readInt("Enter first question ID: ");
-        int id2 = readInt("Enter second question ID: ");
+    static Question selectQuestionOrSearch(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = sc.nextLine().trim();
+            if (input.isEmpty()) continue;
 
-        Question q1 = findQuestion(id1);
-        Question q2 = findQuestion(id2);
+            try {
+                int id = Integer.parseInt(input);
+                Question q = findQuestion(id);
+                if (q != null) return q;
+                System.out.println("Question with ID " + id + " not found.");
+            } catch (NumberFormatException e) {
+                // Search by keyword or subject
+                ArrayList<Question> matches = new ArrayList<>();
+                String lower = input.toLowerCase();
+                for (Question q : questions) {
+                    if (q.question.toLowerCase().contains(lower) || q.subject.toLowerCase().contains(lower)) {
+                        matches.add(q);
+                    }
+                }
+                if (matches.isEmpty()) {
+                    System.out.println("No questions found matching '" + input + "'. Try again.");
+                } else if (matches.size() == 1) {
+                    System.out.println("Selected Q#" + matches.get(0).id + ": " + matches.get(0).question);
+                    return matches.get(0);
+                } else {
+                    System.out.println("\nMatching questions (" + matches.size() + "):");
+                    for (Question m : matches) {
+                        System.out.println("  [" + m.id + "] (" + m.subject + " U" + m.unit + ") " + m.question);
+                    }
+                    int chosenId = readInt("Enter Question ID from above list: ");
+                    Question chosen = findQuestion(chosenId);
+                    if (chosen != null) return chosen;
+                    System.out.println("Invalid selection.");
+                }
+            }
+        }
+    }
+
+    static void similarityCheck() {
+        System.out.println("\n------- QUESTION SIMILARITY CHECKER -------");
+        Question q1 = selectQuestionOrSearch("Enter first question ID or search keyword: ");
+        Question q2 = selectQuestionOrSearch("Enter second question ID or search keyword: ");
 
         if (q1 == null || q2 == null) {
-            System.out.println("Invalid question ID.");
+            System.out.println("Invalid question selection.");
             return;
         }
 
         double similarity = Levenshtein.similarity(q1.question, q2.question);
 
         System.out.println("\n----------- SIMILARITY -----------");
-        System.out.println("Question 1:");
+        System.out.println("Question 1 (Q#" + q1.id + " - " + q1.subject + "):");
         System.out.println(q1.question);
-        System.out.println("\nQuestion 2:");
+        System.out.println("\nQuestion 2 (Q#" + q2.id + " - " + q2.subject + "):");
         System.out.println(q2.question);
         System.out.printf("\nSimilarity: %.2f%%%n", similarity);
 

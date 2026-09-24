@@ -1,0 +1,103 @@
+{
+  "documentMetadata": {
+    "title": "Operating Systems Question Bank 2026 - Comprehensive Set",
+    "subject": "Operating Systems",
+    "code": "23CS202",
+    "year": 2026,
+    "maxMarks": 100,
+    "description": "Comprehensive question bank covering Process Management, CPU Scheduling Algorithms, Inter-Process Communication, Synchronization, Deadlocks, Memory Management, Virtual Memory, and File Systems."
+  },
+  "questions": [
+    {
+      "question": "Explain the concept of Process Control Block (PCB) and describe various process states with a state transition diagram.",
+      "subject": "Operating Systems",
+      "unit": 1,
+      "difficulty": "Easy",
+      "year": 2026
+    },
+    {
+      "question": "Compare Preemptive and Non-Preemptive CPU scheduling algorithms with suitable examples.",
+      "subject": "Operating Systems",
+      "unit": 1,
+      "difficulty": "Easy",
+      "year": 2025
+    },
+    {
+      "question": "Given arrival times and burst times for a set of processes, compute the average turnaround time and average waiting time using Round Robin (RR) scheduling with time quantum = 2ms.",
+      "subject": "Operating Systems",
+      "unit": 1,
+      "difficulty": "Hard",
+      "year": 2026
+    },
+    {
+      "question": "What is the Critical Section Problem? Explain Peterson's algorithm and verify how it satisfies mutual exclusion, progress, and bounded waiting.",
+      "subject": "Operating Systems",
+      "unit": 2,
+      "difficulty": "Hard",
+      "year": 2025
+    },
+    {
+      "question": "Explain counting semaphores and binary semaphores with their wait() and signal() primitive operations.",
+      "subject": "Operating Systems",
+      "unit": 2,
+      "difficulty": "Medium",
+      "year": 2026
+    },
+    {
+      "question": "Describe the Classic Producer-Consumer Problem and formulate a solution using semaphores.",
+      "subject": "Operating Systems",
+      "unit": 2,
+      "difficulty": "Medium",
+      "year": 2024
+    },
+    {
+      "question": "Discuss the four necessary conditions for Deadlock occurrence with real-world examples.",
+      "subject": "Operating Systems",
+      "unit": 3,
+      "difficulty": "Easy",
+      "year": 2026
+    },
+    {
+      "question": "Explain Banker's Algorithm for deadlock avoidance with safety algorithm steps and resource request evaluation.",
+      "subject": "Operating Systems",
+      "unit": 3,
+      "difficulty": "Hard",
+      "year": 2025
+    },
+    {
+      "question": "Explain Paging hardware architecture with Translation Lookaside Buffer (TLB) and calculate effective memory access time.",
+      "subject": "Operating Systems",
+      "unit": 4,
+      "difficulty": "Hard",
+      "year": 2026
+    },
+    {
+      "question": "Differentiate between Internal Fragmentation and External Fragmentation in contiguous memory allocation.",
+      "subject": "Operating Systems",
+      "unit": 4,
+      "difficulty": "Easy",
+      "year": 2025
+    },
+    {
+      "question": "Compare FIFO, Optimal, and LRU Page Replacement algorithms for a given reference string and analyze Belady's Anomaly.",
+      "subject": "Operating Systems",
+      "unit": 4,
+      "difficulty": "Medium",
+      "year": 2026
+    },
+    {
+      "question": "Explain various Disk Scheduling Algorithms: FCFS, SSTF, SCAN, C-SCAN, and LOOK with head movement calculations.",
+      "subject": "Operating Systems",
+      "unit": 5,
+      "difficulty": "Medium",
+      "year": 2025
+    },
+    {
+      "question": "Discuss file allocation methods (Contiguous, Linked, and Indexed Allocation) along with their pros and cons.",
+      "subject": "Operating Systems",
+      "unit": 5,
+      "difficulty": "Medium",
+      "year": 2026
+    }
+  ]
+}
