@@ -329,6 +329,153 @@ const Algorithms = {
     },
 
     /**
+     * Aho-Corasick Multi-Pattern String Matching Automaton
+     * Builds Trie + BFS Failure Transitions + Output Links
+     * Finds multiple keywords simultaneously in O(N + M + Z) time.
+     */
+    ahoCorasick: {
+        buildAutomaton: function (patternsInput) {
+            let patterns = [];
+            if (Array.isArray(patternsInput)) {
+                patterns = patternsInput.filter(p => p && p.trim().length > 0);
+            } else if (typeof patternsInput === 'string') {
+                if (patternsInput.includes(',')) {
+                    patterns = patternsInput.split(',').map(s => s.trim()).filter(Boolean);
+                } else if (patternsInput.includes('|')) {
+                    patterns = patternsInput.split('|').map(s => s.trim()).filter(Boolean);
+                } else {
+                    patterns = [patternsInput.trim()];
+                }
+            }
+
+            const trie = [
+                { id: 0, next: {}, fail: 0, output: [], char: 'ROOT', depth: 0 }
+            ];
+
+            // 1. Insert patterns into Trie
+            patterns.forEach(pat => {
+                const p = pat.toLowerCase();
+                let curr = 0;
+                for (let i = 0; i < p.length; i++) {
+                    const char = p.charAt(i);
+                    if (trie[curr].next[char] === undefined) {
+                        const newId = trie.length;
+                        trie.push({
+                            id: newId,
+                            next: {},
+                            fail: 0,
+                            output: [],
+                            char: char,
+                            depth: trie[curr].depth + 1
+                        });
+                        trie[curr].next[char] = newId;
+                    }
+                    curr = trie[curr].next[char];
+                }
+                if (!trie[curr].output.includes(pat)) {
+                    trie[curr].output.push(pat);
+                }
+            });
+
+            // 2. Build Failure Links & Output Dictionaries via BFS
+            const queue = [];
+            for (const char in trie[0].next) {
+                const childId = trie[0].next[char];
+                trie[childId].fail = 0;
+                queue.push(childId);
+            }
+
+            while (queue.length > 0) {
+                const curr = queue.shift();
+
+                for (const char in trie[curr].next) {
+                    const childId = trie[curr].next[char];
+                    let f = trie[curr].fail;
+
+                    while (f > 0 && trie[f].next[char] === undefined) {
+                        f = trie[f].fail;
+                    }
+
+                    if (trie[f].next[char] !== undefined && trie[f].next[char] !== childId) {
+                        trie[childId].fail = trie[f].next[char];
+                    } else {
+                        trie[childId].fail = 0;
+                    }
+
+                    // Merge outputs from fail state
+                    const failOut = trie[trie[childId].fail].output;
+                    failOut.forEach(outPat => {
+                        if (!trie[childId].output.includes(outPat)) {
+                            trie[childId].output.push(outPat);
+                        }
+                    });
+
+                    queue.push(childId);
+                }
+            }
+
+            return { trie, patterns };
+        },
+
+        search: function (text, patternsInput) {
+            if (!text) return { found: false, matches: [], transitions: 0, patterns: [], automaton: [] };
+
+            const { trie, patterns } = this.buildAutomaton(patternsInput);
+            if (patterns.length === 0) return { found: true, matches: [], transitions: 0, patterns: [], automaton: trie };
+
+            const txt = text.toLowerCase();
+            const matches = [];
+            let curr = 0;
+            let transitions = 0;
+            const steps = [];
+
+            for (let i = 0; i < txt.length; i++) {
+                const char = txt.charAt(i);
+                transitions++;
+
+                while (curr > 0 && trie[curr].next[char] === undefined) {
+                    curr = trie[curr].fail;
+                    transitions++;
+                }
+
+                if (trie[curr].next[char] !== undefined) {
+                    curr = trie[curr].next[char];
+                } else {
+                    curr = 0;
+                }
+
+                if (trie[curr].output.length > 0) {
+                    trie[curr].output.forEach(matchedPat => {
+                        const startIdx = i - matchedPat.length + 1;
+                        matches.push({
+                            pattern: matchedPat,
+                            index: startIdx,
+                            endIndex: i + 1,
+                            state: curr
+                        });
+                    });
+                }
+
+                steps.push({
+                    charIndex: i,
+                    char: char,
+                    stateId: curr,
+                    outputs: [...trie[curr].output]
+                });
+            }
+
+            return {
+                found: matches.length > 0,
+                matches: matches,
+                transitions: transitions,
+                patterns: patterns,
+                automaton: trie,
+                steps: steps
+            };
+        }
+    },
+
+    /**
      * Benchmark & Compare All Searching Algorithms Simultaneously
      */
     benchmarkAll: function (corpus, pattern, maxEditDist = 4) {
@@ -401,7 +548,31 @@ const Algorithms = {
             type: "Sublinear Search with Bad Character Table"
         };
 
-        // 4. Levenshtein / Fuzzy Benchmark
+        // 4. Aho-Corasick Multi-Pattern Benchmark
+        const t0_ac = performance.now();
+        let acMatches = 0;
+        let acComps = 0;
+        const acPatterns = pattern.includes(',') ? pattern.split(',').map(s => s.trim()).filter(Boolean) : [pattern.trim()];
+        const prebuiltAC = this.ahoCorasick.buildAutomaton(acPatterns);
+
+        corpus.forEach(item => {
+            const text = typeof item === 'string' ? item : (item.question || '');
+            const res = this.ahoCorasick.search(text, acPatterns);
+            if (res.found) acMatches++;
+            acComps += res.transitions;
+        });
+        const t1_ac = performance.now();
+        results.algorithms.ahoCorasick = {
+            name: "Aho-Corasick Automaton",
+            timeMs: (t1_ac - t0_ac),
+            matches: acMatches,
+            comparisons: acComps,
+            timeComplexity: "O(N + M + Z)",
+            spaceComplexity: "O(M × Σ)",
+            type: "Multi-Pattern Trie & Failure Link Automaton"
+        };
+
+        // 5. Levenshtein / Fuzzy Benchmark
         const t0_fz = performance.now();
         let fzMatches = 0;
         let fzComps = 0;

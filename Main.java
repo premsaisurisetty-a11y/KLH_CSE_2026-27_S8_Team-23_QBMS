@@ -22,10 +22,11 @@ public class Main {
             System.out.println("4. Delete Question");
             System.out.println("5. KMP Search");
             System.out.println("6. Rabin-Karp Search");
-            System.out.println("7. Fuzzy Search");
-            System.out.println("8. Question Similarity");
-            System.out.println("9. Duplicate Detection");
-            System.out.println("10. Exit");
+            System.out.println("7. Aho-Corasick Multi-Pattern Search");
+            System.out.println("8. Fuzzy Search");
+            System.out.println("9. Question Similarity");
+            System.out.println("10. Duplicate Detection");
+            System.out.println("11. Exit");
 
             System.out.print("\nEnter choice: ");
             String choiceLine = sc.nextLine().trim();
@@ -63,23 +64,27 @@ public class Main {
                     break;
 
                 case 7:
-                    fuzzySearch();
+                    ahoCorasickSearch();
                     break;
 
                 case 8:
-                    similarityCheck();
+                    fuzzySearch();
                     break;
 
                 case 9:
-                    duplicateDetection();
+                    similarityCheck();
                     break;
 
                 case 10:
+                    duplicateDetection();
+                    break;
+
+                case 11:
                     System.out.println("Exiting...");
                     return;
 
                 default:
-                    System.out.println("Invalid choice. Please enter a number between 1 and 10.");
+                    System.out.println("Invalid choice. Please enter a number between 1 and 11.");
             }
         }
     }
@@ -209,6 +214,53 @@ public class Main {
 
         if (!found) {
             System.out.println("No exact match found.");
+        }
+    }
+
+    static void ahoCorasickSearch() {
+        System.out.print("\nEnter keyword(s) to search (comma-separated for multi-pattern): ");
+        String input = sc.nextLine().trim();
+
+        if (input.isEmpty()) {
+            System.out.println("No keywords provided.");
+            return;
+        }
+
+        String[] rawPatterns = input.split(",");
+        List<String> patterns = new ArrayList<>();
+        for (String p : rawPatterns) {
+            String trimmed = p.trim();
+            if (!trimmed.isEmpty()) {
+                patterns.add(trimmed);
+            }
+        }
+
+        if (patterns.isEmpty()) {
+            System.out.println("No valid keywords provided.");
+            return;
+        }
+
+        AhoCorasick ac = new AhoCorasick(patterns);
+        boolean found = false;
+        System.out.println("\n------- AHO-CORASICK MULTI-PATTERN RESULTS -------");
+        System.out.println("Searching dictionary patterns: " + patterns);
+
+        for (Question q : questions) {
+            List<AhoCorasick.Match> matches = ac.searchAll(q.question);
+            if (!matches.isEmpty()) {
+                q.display();
+                System.out.print("   ↳ Matched Patterns: ");
+                Set<String> matchedSet = new LinkedHashSet<>();
+                for (AhoCorasick.Match m : matches) {
+                    matchedSet.add(m.pattern + " @" + m.startIndex);
+                }
+                System.out.println(String.join(", ", matchedSet));
+                found = true;
+            }
+        }
+
+        if (!found) {
+            System.out.println("No matching questions found across the repository.");
         }
     }
 

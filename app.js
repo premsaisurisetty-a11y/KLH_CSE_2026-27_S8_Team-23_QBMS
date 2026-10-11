@@ -124,6 +124,7 @@ class QBMSApp {
         this.loadData();
         this.initEventListeners();
         this.initGlobalFuzzySearch();
+        this.initInlineAutocompletes();
         this.initSearchingAlgorithmsHub();
         this.initAuth();
         this.updateUI();
@@ -429,6 +430,219 @@ class QBMSApp {
         }
     }
 
+    // --- Autocomplete Dictionary Builder & Search Bar Inline Ghost Text Suggestion ---
+    getAutocompleteCandidates() {
+        const set = new Set();
+
+        // 1. All questions from database
+        this.questions.forEach(q => {
+            if (q.question) {
+                set.add(q.question.trim());
+                // Question core phrases without question openers
+                const cleaned = q.question.replace(/^(Explain the working of|Explain|Discuss|What is the time complexity of|What is the|What is|Describe how|Describe|Compare|Construct a|Construct)\s+/i, '').replace(/[.?]$/, '').trim();
+                if (cleaned && cleaned.length > 3) set.add(cleaned);
+            }
+        });
+
+        // 2. Core Curriculum Topics & Algorithms
+        const coreTopics = [
+            "Binary Search",
+            "Binary Search Tree",
+            "Binary Search Tree and its operations",
+            "Bubble Sort",
+            "Merge Sort",
+            "Quick Sort",
+            "Heap Sort",
+            "Dijkstra's Shortest Path Algorithm",
+            "Bellman-Ford Routing Algorithm",
+            "Knuth-Morris-Pratt (KMP) Algorithm",
+            "Rabin-Karp Rolling Hash",
+            "Aho-Corasick Multi-Pattern Search",
+            "Boyer-Moore-Horspool Search",
+            "Levenshtein Distance",
+            "Process Control Block (PCB)",
+            "Peterson's Algorithm",
+            "Banker's Algorithm for deadlock avoidance",
+            "Page Replacement Algorithms",
+            "FIFO Page Replacement",
+            "LRU Page Replacement",
+            "Optimal Page Replacement",
+            "Disk Scheduling Algorithms",
+            "Three-Schema Architecture",
+            "Relational Algebra",
+            "Normalization (1NF, 2NF, 3NF, BCNF)",
+            "ACID Properties",
+            "Conflict Serializability",
+            "B+ Tree",
+            "7-Layer OSI Reference Model",
+            "TCP/IP Protocol Suite",
+            "Sliding Window Flow Control",
+            "Stop-and-Wait ARQ",
+            "Go-Back-N ARQ",
+            "Selective Repeat ARQ",
+            "Distance Vector Routing",
+            "TCP 3-Way Handshake",
+            "Congestion Control (AIMD)",
+            "Domain Name System (DNS)"
+        ];
+        coreTopics.forEach(t => set.add(t));
+
+        // 3. Subject Names & Document Titles
+        this.documents.forEach(d => {
+            if (d.title) set.add(d.title);
+            if (d.subject) set.add(d.subject);
+        });
+
+        return Array.from(set);
+    }
+
+    getInlineSuggestion(rawInput) {
+        if (!rawInput || !rawInput.trim()) return null;
+        const query = rawInput.trim();
+        const qLower = query.toLowerCase();
+        const candidates = this.getAutocompleteCandidates();
+
+        // Priority 1: Direct prefix match on full candidate (e.g. "bin" -> "Binary Search")
+        for (const cand of candidates) {
+            if (cand.toLowerCase().startsWith(qLower) && cand.toLowerCase() !== qLower) {
+                const suffix = cand.substring(rawInput.length);
+                return {
+                    candidate: cand,
+                    typed: rawInput,
+                    suffix: suffix,
+                    fullCompletion: rawInput + suffix
+                };
+            }
+        }
+
+        // Priority 2: Word-boundary match in candidate (e.g. "search" -> "Search Tree", "sort" -> "Sort algorithm")
+        for (const cand of candidates) {
+            const words = cand.split(/\s+/);
+            for (let i = 0; i < words.length; i++) {
+                const word = words[i];
+                if (word.toLowerCase().startsWith(qLower) && word.toLowerCase() !== qLower) {
+                    const remainingWords = words.slice(i).join(' ');
+                    const suffix = remainingWords.substring(rawInput.length);
+                    return {
+                        candidate: remainingWords,
+                        typed: rawInput,
+                        suffix: suffix,
+                        fullCompletion: rawInput + suffix
+                    };
+                }
+            }
+        }
+
+        // Priority 3: Fuzzy typo-tolerant prefix suggestion (e.g. "binry" -> "Binary Search", "deadlok" -> "Deadlock")
+        if (qLower.length >= 3) {
+            let bestCand = null;
+            let bestSim = 0;
+
+            for (const cand of candidates) {
+                const firstWord = cand.split(/\s+/)[0];
+                const sim = Algorithms.levenshtein.similarity(qLower, firstWord).similarity;
+                const dist = Algorithms.levenshtein.distance(qLower, firstWord).distance;
+
+                if ((dist <= 2 || sim >= 65) && sim > bestSim) {
+                    bestSim = sim;
+                    bestCand = cand;
+                }
+            }
+
+            if (bestCand && bestSim >= 65) {
+                return {
+                    candidate: bestCand,
+                    typed: rawInput,
+                    suffix: ` (${bestCand})`,
+                    fullCompletion: bestCand
+                };
+            }
+        }
+
+        return null;
+    }
+
+    setupInlineAutocomplete(inputId, ghostId, onSelect) {
+        const inputEl = document.getElementById(inputId);
+        const ghostEl = document.getElementById(ghostId);
+        if (!inputEl || !ghostEl) return;
+
+        const prefixSpan = ghostEl.querySelector('.ghost-prefix');
+        const suffixSpan = ghostEl.querySelector('.ghost-suffix');
+        const tabKeySpan = ghostEl.querySelector('.ghost-tab-key');
+
+        let currentSuggestion = null;
+
+        const updateGhost = () => {
+            const val = inputEl.value;
+            if (!val || !val.trim()) {
+                currentSuggestion = null;
+                if (prefixSpan) prefixSpan.textContent = '';
+                if (suffixSpan) suffixSpan.textContent = '';
+                if (tabKeySpan) tabKeySpan.style.display = 'none';
+                return;
+            }
+
+            currentSuggestion = this.getInlineSuggestion(val);
+
+            if (currentSuggestion && prefixSpan && suffixSpan) {
+                prefixSpan.textContent = val;
+                suffixSpan.textContent = currentSuggestion.suffix;
+                if (tabKeySpan) tabKeySpan.style.display = 'inline-flex';
+            } else {
+                if (prefixSpan) prefixSpan.textContent = '';
+                if (suffixSpan) suffixSpan.textContent = '';
+                if (tabKeySpan) tabKeySpan.style.display = 'none';
+            }
+        };
+
+        inputEl.addEventListener('input', updateGhost);
+        inputEl.addEventListener('keyup', updateGhost);
+        inputEl.addEventListener('focus', updateGhost);
+
+        inputEl.addEventListener('blur', () => {
+            if (prefixSpan) prefixSpan.textContent = '';
+            if (suffixSpan) suffixSpan.textContent = '';
+            if (tabKeySpan) tabKeySpan.style.display = 'none';
+        });
+
+        inputEl.addEventListener('keydown', (e) => {
+            if (!currentSuggestion) return;
+
+            // Tab key or Right arrow at the end of input accepts suggestion
+            if (e.key === 'Tab' || (e.key === 'ArrowRight' && inputEl.selectionStart === inputEl.value.length)) {
+                e.preventDefault();
+                inputEl.value = currentSuggestion.fullCompletion || currentSuggestion.candidate;
+                currentSuggestion = null;
+                if (prefixSpan) prefixSpan.textContent = '';
+                if (suffixSpan) suffixSpan.textContent = '';
+                if (tabKeySpan) tabKeySpan.style.display = 'none';
+
+                inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+                if (typeof onSelect === 'function') {
+                    onSelect(inputEl.value);
+                }
+            } else if (e.key === 'Escape') {
+                currentSuggestion = null;
+                if (prefixSpan) prefixSpan.textContent = '';
+                if (suffixSpan) suffixSpan.textContent = '';
+                if (tabKeySpan) tabKeySpan.style.display = 'none';
+            }
+        });
+    }
+
+    initInlineAutocompletes() {
+        // 1. Global Header Fuzzy Search Bar
+        this.setupInlineAutocomplete('globalFuzzySearchInput', 'globalFuzzyGhostText', (accepted) => {
+            this.handleGlobalFuzzyInput(accepted);
+        });
+
+        // 2. Question Bank Quick Search Bar
+        this.setupInlineAutocomplete('quickSearchInput', 'quickSearchGhostText', () => {
+            this.renderQuestionsTable();
+        });
+    }
+
     // --- Global Universal Fuzzy Search Bar ---
     initGlobalFuzzySearch() {
         const input = document.getElementById('globalFuzzySearchInput');
@@ -646,6 +860,11 @@ class QBMSApp {
             if (e.key === 'Enter') this.runHubRabinKarp();
         });
 
+        document.getElementById('hubAcRunBtn')?.addEventListener('click', () => this.runHubAhoCorasick());
+        document.getElementById('hubAcInput')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.runHubAhoCorasick();
+        });
+
         document.getElementById('hubFuzzyRunBtn')?.addEventListener('click', () => this.runHubFuzzyMatrix());
         document.getElementById('hubFuzzySampleBtn')?.addEventListener('click', () => this.loadFuzzySamplePair());
 
@@ -679,6 +898,8 @@ class QBMSApp {
             this.runHubKmp();
         } else if (tabName === 'rabinkarp') {
             this.runHubRabinKarp();
+        } else if (tabName === 'ahocorasick') {
+            this.runHubAhoCorasick();
         } else if (tabName === 'fuzzy') {
             this.runHubFuzzyMatrix();
         } else if (tabName === 'boyermoore') {
@@ -696,6 +917,7 @@ class QBMSApp {
 
         if (!cardsGrid || !resultsList) return;
 
+        // When searching a question or benchmarking, default to all documents so matches from all sets are found
         const targetCorpus = scope === 'active' ? this.getScopedQuestions() : this.questions;
 
         if (targetCorpus.length === 0) {
@@ -706,10 +928,11 @@ class QBMSApp {
 
         const bench = Algorithms.benchmarkAll(targetCorpus, query, maxDist);
 
-        // Find fastest algorithm
+        // All 5 algorithms
         const algos = [
             { key: 'kmp', data: bench.algorithms.kmp, icon: 'fa-bolt', color: '#6366f1' },
             { key: 'rabinKarp', data: bench.algorithms.rabinKarp, icon: 'fa-fingerprint', color: '#a855f7' },
+            { key: 'ahoCorasick', data: bench.algorithms.ahoCorasick, icon: 'fa-network-wired', color: '#f59e0b' },
             { key: 'boyerMoore', data: bench.algorithms.boyerMoore, icon: 'fa-forward-fast', color: '#06b6d4' },
             { key: 'fuzzy', data: bench.algorithms.fuzzy, icon: 'fa-wand-magic-sparkles', color: '#ec4899' }
         ];
@@ -723,7 +946,7 @@ class QBMSApp {
             }
         });
 
-        // Render 4 Performance Cards
+        // Render 5 Performance Cards
         cardsGrid.innerHTML = algos.map(a => {
             const isWinner = a.key === fastestKey;
             const timeMicros = (a.data.timeMs * 1000).toFixed(1);
@@ -767,22 +990,24 @@ class QBMSApp {
             `;
         }).join('');
 
-        // Find match details for each question
+        // Find match details for each question across all documents
         const matchedQuestions = [];
         targetCorpus.forEach(q => {
             const kmpRes = Algorithms.kmp.search(q.question, query);
             const rkRes = Algorithms.rabinKarp.search(q.question, query);
+            const acRes = Algorithms.ahoCorasick.search(q.question, query);
             const bmRes = Algorithms.boyerMoore.search(q.question, query);
             const fzRes = Algorithms.levenshtein.bestSubstringDistance(query, q.question);
             const fzSim = Algorithms.levenshtein.similarity(query, q.question).similarity;
 
             const isFuzzyMatch = fzRes.distance <= maxDist || fzSim >= 60 || q.question.toLowerCase().includes(query.toLowerCase());
 
-            if (kmpRes.found || rkRes.found || bmRes.found || isFuzzyMatch) {
+            if (kmpRes.found || rkRes.found || acRes.found || bmRes.found || isFuzzyMatch) {
                 matchedQuestions.push({
                     question: q,
                     kmp: kmpRes.found,
                     rk: rkRes.found,
+                    ac: acRes.found,
                     bm: bmRes.found,
                     fuzzy: isFuzzyMatch,
                     fzDistance: fzRes.distance,
@@ -798,7 +1023,7 @@ class QBMSApp {
             resultsList.innerHTML = `
                 <div style="text-align: center; padding: 32px; color: var(--text-muted); background: var(--bg-glass); border-radius: var(--radius-md);">
                     <i class="fa-solid fa-crosshairs" style="font-size: 2rem; opacity: 0.5; margin-bottom: 8px; display: block;"></i>
-                    No questions matched the query "${this.escapeHTML(query)}" across the 4 algorithms.
+                    No questions matched the query "${this.escapeHTML(query)}" across the 5 algorithms.
                 </div>
             `;
             return;
@@ -819,9 +1044,10 @@ class QBMSApp {
                             <span class="badge badge-unit">Unit ${m.question.unit}</span>
                             <span class="badge badge-${m.question.difficulty.toLowerCase()}">${m.question.difficulty}</span>
                         </div>
-                        <div style="display: flex; gap: 6px; align-items: center;">
+                        <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
                             <span class="badge ${m.kmp ? 'badge-easy' : 'badge-hard'}" style="font-size: 0.72rem;">KMP: ${m.kmp ? '✓ Match' : '✗'}</span>
                             <span class="badge ${m.rk ? 'badge-easy' : 'badge-hard'}" style="font-size: 0.72rem;">Rabin-Karp: ${m.rk ? '✓ Match' : '✗'}</span>
+                            <span class="badge ${m.ac ? 'badge-easy' : 'badge-hard'}" style="font-size: 0.72rem;">Aho-Corasick: ${m.ac ? '✓ Match' : '✗'}</span>
                             <span class="badge ${m.bm ? 'badge-easy' : 'badge-hard'}" style="font-size: 0.72rem;">Boyer-Moore: ${m.bm ? '✓ Match' : '✗'}</span>
                             <span class="badge ${m.fuzzy ? 'badge-easy' : 'badge-hard'}" style="font-size: 0.72rem;">Fuzzy (${m.fzSimilarity.toFixed(0)}%): ${m.fuzzy ? '✓ Match' : '✗'}</span>
                         </div>
@@ -930,6 +1156,108 @@ class QBMSApp {
                         </span>
                     </div>
                     <div style="margin-top: 8px; font-size: 0.95rem;">${this.highlightMatches(m.question.question, pattern)}</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    runHubAhoCorasick() {
+        const inputStr = (document.getElementById('hubAcInput')?.value || 'Binary Search, Tree, Deadlock, Sort').trim();
+        const nodesList = document.getElementById('hubAcNodesList');
+        const resultsList = document.getElementById('hubAcResultsList');
+        const stateCountBadge = document.getElementById('hubAcStateCountBadge');
+        const matchesCountBadge = document.getElementById('hubAcMatchesCount');
+
+        if (!inputStr || !nodesList) return;
+
+        const patterns = inputStr.split(',').map(s => s.trim()).filter(Boolean);
+        if (patterns.length === 0) return;
+
+        const { trie } = Algorithms.ahoCorasick.buildAutomaton(patterns);
+
+        if (stateCountBadge) {
+            stateCountBadge.textContent = `${trie.length} Automaton States`;
+        }
+
+        // Render Trie States & Failures
+        nodesList.innerHTML = trie.map(node => {
+            const nextKeys = Object.keys(node.next);
+            return `
+                <div class="ac-node-card">
+                    <div class="ac-node-header">
+                        <span class="ac-node-title">
+                            <span class="ac-node-char">${node.id === 0 ? '⌂' : this.escapeHTML(node.char)}</span>
+                            <span>State #${node.id}</span>
+                        </span>
+                        <span class="badge badge-unit" style="font-size: 0.7rem;">Depth ${node.depth}</span>
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">Transitions:</div>
+                    <div class="ac-transitions-list">
+                        ${nextKeys.length === 0 ? '<span style="color: var(--text-muted); font-style: italic;">(Leaf)</span>' :
+                            nextKeys.map(k => `<span class="ac-trans-badge"><strong>'${this.escapeHTML(k)}'</strong> &rarr; #${node.next[k]}</span>`).join('')}
+                    </div>
+                    <div class="ac-fail-link">
+                        <i class="fa-solid fa-arrow-turn-down"></i> Fail Target: <strong>State #${node.fail}</strong>
+                    </div>
+                    ${node.output.length > 0 ? `
+                        <div class="ac-output-badge">
+                            <i class="fa-solid fa-check"></i> Output: ${node.output.map(o => `<strong>"${this.escapeHTML(o)}"</strong>`).join(', ')}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }).join('');
+
+        // Search across ALL repository questions
+        const targetQuestions = this.questions;
+        const matches = [];
+
+        targetQuestions.forEach(q => {
+            const res = Algorithms.ahoCorasick.search(q.question, patterns);
+            if (res.found) {
+                matches.push({ question: q, matches: res.matches, transitions: res.transitions });
+            }
+        });
+
+        if (matchesCountBadge) {
+            matchesCountBadge.textContent = `${matches.length} Questions Matched`;
+        }
+
+        if (matches.length === 0) {
+            resultsList.innerHTML = `<p style="color: var(--text-muted); font-style: italic; padding: 14px;">No questions contain any of the dictionary patterns "${this.escapeHTML(inputStr)}".</p>`;
+            return;
+        }
+
+        resultsList.innerHTML = matches.map(m => {
+            const doc = this.documents.find(d => d.id === m.question.docId);
+            const docName = doc ? doc.title : 'Global Bank';
+            const matchedPats = [...new Set(m.matches.map(x => x.pattern))];
+
+            let highlighted = m.question.question;
+            matchedPats.forEach(pat => {
+                highlighted = this.highlightMatches(highlighted, pat);
+            });
+
+            return `
+                <div class="dup-item" style="flex-direction: column; align-items: stretch;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                            <span style="font-weight: 700; color: var(--accent-primary);">#${m.question.id}</span>
+                            <span class="badge badge-doc">${this.escapeHTML(docName)}</span>
+                            <span class="badge badge-subject">${m.question.subject}</span>
+                            <span class="badge badge-unit">Unit ${m.question.unit}</span>
+                            <span class="badge badge-${m.question.difficulty.toLowerCase()}">${m.question.difficulty}</span>
+                        </div>
+                        <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                            ${matchedPats.map(p => `<span class="badge badge-easy" style="font-size: 0.72rem;"><i class="fa-solid fa-check"></i> "${this.escapeHTML(p)}"</span>`).join('')}
+                            <span style="font-size: 0.78rem; color: var(--info); font-family: var(--font-mono); margin-left: 6px;">
+                                ${m.transitions} transitions
+                            </span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 0.95rem; line-height: 1.5;">
+                        ${highlighted}
+                    </div>
                 </div>
             `;
         }).join('');
@@ -1205,6 +1533,12 @@ class QBMSApp {
             if (e.key === 'Enter') this.runRabinKarpSearch();
         });
 
+        // Aho-Corasick Multi-Pattern Search View
+        document.getElementById('acSearchBtn')?.addEventListener('click', () => this.runAhoCorasickSearch());
+        document.getElementById('acKeyword')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.runAhoCorasickSearch();
+        });
+
         // Fuzzy Search View
         document.getElementById('fuzzyThreshold')?.addEventListener('input', (e) => {
             document.getElementById('fuzzyThresholdVal').textContent = e.target.value;
@@ -1410,7 +1744,9 @@ class QBMSApp {
 
         const isAdmin = this.currentUser?.role === 'admin';
         const query = (document.getElementById('quickSearchInput')?.value || '').toLowerCase().trim();
-        const selDoc = document.getElementById('filterDoc')?.value || (this.activeDocId !== 'all' ? this.activeDocId : '');
+        const explicitFilterDoc = document.getElementById('filterDoc')?.value || '';
+        // When searching a question, search across ALL documents unless user explicitly chose a specific document in filterDoc
+        const selDoc = query ? explicitFilterDoc : (explicitFilterDoc || (this.activeDocId !== 'all' ? this.activeDocId : ''));
         const selSubject = document.getElementById('filterSubject')?.value || '';
         const selUnit = document.getElementById('filterUnit')?.value || '';
         const selDiff = document.getElementById('filterDifficulty')?.value || '';
@@ -1899,7 +2235,8 @@ class QBMSApp {
             </div>
         `).join('');
 
-        const targetQuestions = this.getScopedQuestions();
+        // When searching a pattern, search across ALL repository documents
+        const targetQuestions = this.questions;
         const matches = [];
 
         targetQuestions.forEach(q => {
@@ -1910,7 +2247,7 @@ class QBMSApp {
         });
 
         if (matches.length === 0) {
-            resultsList.innerHTML = `<p style="color: var(--text-muted); font-style: italic;">No exact KMP match found in the selected scope.</p>`;
+            resultsList.innerHTML = `<p style="color: var(--text-muted); font-style: italic;">No exact KMP match found across all documents.</p>`;
             return;
         }
 
@@ -1920,10 +2257,11 @@ class QBMSApp {
             return `
                 <div class="dup-item">
                     <div style="flex: 1;">
-                        <div style="display: flex; gap: 8px; margin-bottom: 6px; align-items: center;">
+                        <div style="display: flex; gap: 8px; margin-bottom: 6px; align-items: center; flex-wrap: wrap;">
                             <span style="font-weight: 700; color: var(--accent-primary);">#${m.question.id}</span>
-                            <span class="badge badge-doc">${this.escapeHTML(doc ? doc.title : 'Global')}</span>
+                            <span class="badge badge-doc">${this.escapeHTML(doc ? doc.title : 'Global Bank')}</span>
                             <span class="badge badge-subject">${m.question.subject}</span>
+                            <span class="badge badge-unit">Unit ${m.question.unit}</span>
                             <span class="badge badge-${m.question.difficulty.toLowerCase()}">${m.question.difficulty}</span>
                             <span style="font-size: 0.8rem; color: var(--success);"><i class="fa-solid fa-check"></i> ${m.matchIndices.length} occurrence(s)</span>
                         </div>
@@ -1948,7 +2286,8 @@ class QBMSApp {
 
         const matches = [];
         let patternHashSample = null;
-        const targetQuestions = this.getScopedQuestions();
+        // Search across ALL repository documents
+        const targetQuestions = this.questions;
 
         targetQuestions.forEach(q => {
             const res = Algorithms.rabinKarp.search(q.question, keyword);
@@ -1962,7 +2301,7 @@ class QBMSApp {
         hashText.innerHTML = `Pattern: <strong>"${this.escapeHTML(keyword)}"</strong> | Hash Value ($P \\pmod{101}$): <strong style="color: #6366f1;">${patternHashSample}</strong> (Base: 256, Modulo: 101)`;
 
         if (matches.length === 0) {
-            resultsList.innerHTML = `<p style="color: var(--text-muted); font-style: italic;">No exact Rabin-Karp match found in selected scope.</p>`;
+            resultsList.innerHTML = `<p style="color: var(--text-muted); font-style: italic;">No exact Rabin-Karp match found across all documents.</p>`;
             return;
         }
 
@@ -1973,11 +2312,12 @@ class QBMSApp {
 
             return `
                 <div class="dup-item" style="flex-direction: column; align-items: stretch;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div style="display: flex; gap: 8px; align-items: center;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">
+                        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                             <span style="font-weight: 700; color: var(--accent-primary);">#${m.question.id}</span>
-                            <span class="badge badge-doc">${this.escapeHTML(doc ? doc.title : 'Global')}</span>
+                            <span class="badge badge-doc">${this.escapeHTML(doc ? doc.title : 'Global Bank')}</span>
                             <span class="badge badge-subject">${m.question.subject}</span>
+                            <span class="badge badge-unit">Unit ${m.question.unit}</span>
                             <span class="badge badge-${m.question.difficulty.toLowerCase()}">${m.question.difficulty}</span>
                         </div>
                         <span style="font-size: 0.8rem; color: var(--info); font-family: var(--font-mono);">
@@ -1990,7 +2330,111 @@ class QBMSApp {
         }).join('');
     }
 
-    // --- View 4: Fuzzy Search (Levenshtein) ---
+    // --- View 4: Aho-Corasick Multi-Pattern Search Execution ---
+    runAhoCorasickSearch() {
+        const inputStr = (document.getElementById('acKeyword')?.value || '').trim();
+        const container = document.getElementById('acAutomatonContainer');
+        const nodesDisplay = document.getElementById('acNodesDisplay');
+        const resultsList = document.getElementById('acResultsList');
+        const stateBadge = document.getElementById('acStateCountBadge');
+        const countBadge = document.getElementById('acResultsCountBadge');
+
+        if (!inputStr) {
+            this.showToast('Please enter one or more keywords (comma-separated) for Aho-Corasick search.', 'warning');
+            return;
+        }
+
+        const patterns = inputStr.split(',').map(s => s.trim()).filter(Boolean);
+        if (patterns.length === 0) return;
+
+        const { trie } = Algorithms.ahoCorasick.buildAutomaton(patterns);
+
+        if (container) container.style.display = 'block';
+        if (stateBadge) stateBadge.textContent = `${trie.length} Automaton States`;
+
+        if (nodesDisplay) {
+            nodesDisplay.innerHTML = trie.map(node => {
+                const nextKeys = Object.keys(node.next);
+                return `
+                    <div class="ac-node-card">
+                        <div class="ac-node-header">
+                            <span class="ac-node-title">
+                                <span class="ac-node-char">${node.id === 0 ? '⌂' : this.escapeHTML(node.char)}</span>
+                                <span>State #${node.id}</span>
+                            </span>
+                            <span class="badge badge-unit" style="font-size: 0.7rem;">Depth ${node.depth}</span>
+                        </div>
+                        <div class="ac-transitions-list">
+                            ${nextKeys.length === 0 ? '<span style="color: var(--text-muted); font-style: italic;">(Leaf)</span>' :
+                                nextKeys.map(k => `<span class="ac-trans-badge">'${this.escapeHTML(k)}' &rarr; #${node.next[k]}</span>`).join('')}
+                        </div>
+                        <div class="ac-fail-link">
+                            <i class="fa-solid fa-arrow-turn-down"></i> Fail Target: State #${node.fail}
+                        </div>
+                        ${node.output.length > 0 ? `
+                            <div class="ac-output-badge">
+                                <i class="fa-solid fa-check"></i> Output: ${node.output.map(o => `"${this.escapeHTML(o)}"`).join(', ')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Search across ALL repository questions
+        const matches = [];
+        this.questions.forEach(q => {
+            const res = Algorithms.ahoCorasick.search(q.question, patterns);
+            if (res.found) {
+                matches.push({ question: q, matches: res.matches, transitions: res.transitions });
+            }
+        });
+
+        if (countBadge) {
+            countBadge.textContent = `${matches.length} Questions Matched`;
+        }
+
+        if (matches.length === 0) {
+            resultsList.innerHTML = `<p style="color: var(--text-muted); font-style: italic; padding: 14px;">No questions matched the pattern set "${this.escapeHTML(inputStr)}" across any document.</p>`;
+            return;
+        }
+
+        resultsList.innerHTML = matches.map(m => {
+            const doc = this.documents.find(d => d.id === m.question.docId);
+            const docName = doc ? doc.title : 'Global Bank';
+            const matchedPats = [...new Set(m.matches.map(x => x.pattern))];
+
+            let highlighted = m.question.question;
+            matchedPats.forEach(pat => {
+                highlighted = this.highlightMatches(highlighted, pat);
+            });
+
+            return `
+                <div class="dup-item" style="flex-direction: column; align-items: stretch;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                            <span style="font-weight: 700; color: var(--accent-primary);">#${m.question.id}</span>
+                            <span class="badge badge-doc">${this.escapeHTML(docName)}</span>
+                            <span class="badge badge-subject">${m.question.subject}</span>
+                            <span class="badge badge-unit">Unit ${m.question.unit}</span>
+                            <span class="badge badge-${m.question.difficulty.toLowerCase()}">${m.question.difficulty}</span>
+                        </div>
+                        <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                            ${matchedPats.map(p => `<span class="badge badge-easy" style="font-size: 0.72rem;"><i class="fa-solid fa-check"></i> "${this.escapeHTML(p)}"</span>`).join('')}
+                            <span style="font-size: 0.78rem; color: var(--info); font-family: var(--font-mono); margin-left: 6px;">
+                                ${m.transitions} transitions
+                            </span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 0.95rem; line-height: 1.5;">
+                        ${highlighted}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // --- View 5: Fuzzy Search (Levenshtein) ---
     runFuzzySearch() {
         const query = document.getElementById('fuzzyQuery').value.trim();
         const threshold = parseInt(document.getElementById('fuzzyThreshold').value);
@@ -2002,7 +2446,8 @@ class QBMSApp {
         }
 
         const results = [];
-        const targetQuestions = this.getScopedQuestions();
+        // Search across ALL repository documents
+        const targetQuestions = this.questions;
 
         targetQuestions.forEach(q => {
             const fullDist = Algorithms.levenshtein.distance(query, q.question).distance;
@@ -2025,7 +2470,7 @@ class QBMSApp {
         results.sort((a, b) => b.similarity - a.similarity);
 
         if (results.length === 0) {
-            resultsList.innerHTML = `<p style="color: var(--text-muted); font-style: italic;">No questions match within edit distance ≤ ${threshold}.</p>`;
+            resultsList.innerHTML = `<p style="color: var(--text-muted); font-style: italic;">No questions match within edit distance ≤ ${threshold} across all documents.</p>`;
             return;
         }
 
@@ -2034,10 +2479,11 @@ class QBMSApp {
             return `
                 <div class="dup-item">
                     <div style="flex: 1;">
-                        <div style="display: flex; gap: 8px; margin-bottom: 6px; align-items: center;">
+                        <div style="display: flex; gap: 8px; margin-bottom: 6px; align-items: center; flex-wrap: wrap;">
                             <span style="font-weight: 700; color: var(--accent-primary);">#${r.question.id}</span>
-                            <span class="badge badge-doc">${this.escapeHTML(doc ? doc.title : 'Global')}</span>
+                            <span class="badge badge-doc">${this.escapeHTML(doc ? doc.title : 'Global Bank')}</span>
                             <span class="badge badge-subject">${r.question.subject}</span>
+                            <span class="badge badge-unit">Unit ${r.question.unit}</span>
                             <span class="badge badge-${r.question.difficulty.toLowerCase()}">${r.question.difficulty}</span>
                             ${r.matchedPhrase ? `<span class="badge badge-unit"><i class="fa-solid fa-crosshairs"></i> Closest: "${this.escapeHTML(r.matchedPhrase)}"</span>` : ''}
                         </div>

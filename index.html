@@ -129,7 +129,7 @@
                 <a class="nav-item" data-view="search-algorithms">
                     <i class="fa-solid fa-microchip nav-icon"></i>
                     <span>Searching Algorithms</span>
-                    <span class="nav-badge" style="background: linear-gradient(135deg, #6366f1, #ec4899); font-weight: 700;">ALL 4</span>
+                    <span class="nav-badge" style="background: linear-gradient(135deg, #6366f1, #ec4899); font-weight: 700;">ALL 5</span>
                 </a>
                 <div class="nav-sub-menu">
                     <a class="nav-sub-item" data-view="kmp-search">
@@ -137,6 +137,9 @@
                     </a>
                     <a class="nav-sub-item" data-view="rabin-karp">
                         <i class="fa-solid fa-fingerprint"></i> <span>Rabin-Karp</span>
+                    </a>
+                    <a class="nav-sub-item" data-view="aho-corasick">
+                        <i class="fa-solid fa-network-wired"></i> <span>Aho-Corasick</span>
                     </a>
                     <a class="nav-sub-item" data-view="fuzzy-search">
                         <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Fuzzy Search</span>
@@ -175,11 +178,16 @@
                     <p id="pageSubHeading">Store and organize sets of questions into individual structured documents</p>
                 </div>
 
-                <!-- MAIN GLOBAL FUZZY SEARCH BAR -->
+                <!-- MAIN GLOBAL FUZZY SEARCH BAR WITH INLINE AUTOCOMPLETE -->
                 <div class="global-fuzzy-search-wrap" id="globalFuzzySearchWrap">
                     <div class="global-fuzzy-input-box">
                         <i class="fa-solid fa-wand-magic-sparkles fuzzy-icon-magic"></i>
-                        <input type="text" id="globalFuzzySearchInput" placeholder="Fuzzy Search questions (e.g. 'binry serch', 'deadlok', 'dijksta')..." autocomplete="off">
+                        <div class="inline-autocomplete-wrap" id="globalFuzzyAutoWrap">
+                            <div class="inline-ghost-text" id="globalFuzzyGhostText" aria-hidden="true">
+                                <span class="ghost-prefix"></span><span class="ghost-suffix"></span><span class="ghost-tab-key" style="display: none;"><kbd>Tab ⇥</kbd></span>
+                            </div>
+                            <input type="text" id="globalFuzzySearchInput" placeholder="Fuzzy Search questions (e.g. 'binry serch', 'deadlok', 'dijksta')..." autocomplete="off" spellcheck="false">
+                        </div>
                         <div class="fuzzy-badge-pill" title="Levenshtein Dynamic Programming Fuzzy Algorithm">
                             <i class="fa-solid fa-bolt"></i> Fuzzy DP
                         </div>
@@ -278,7 +286,12 @@
                     <div class="table-search-group">
                         <div class="search-box">
                             <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                            <input type="text" id="quickSearchInput" placeholder="Quick search questions or keywords...">
+                            <div class="inline-autocomplete-wrap" id="quickSearchAutoWrap">
+                                <div class="inline-ghost-text search-box-ghost" id="quickSearchGhostText" aria-hidden="true">
+                                    <span class="ghost-prefix"></span><span class="ghost-suffix"></span><span class="ghost-tab-key" style="display: none;"><kbd>Tab ⇥</kbd></span>
+                                </div>
+                                <input type="text" id="quickSearchInput" placeholder="Quick search questions or keywords..." autocomplete="off" spellcheck="false">
+                            </div>
                         </div>
                         <button type="button" class="btn btn-secondary btn-sm fuzzy-table-toggle active" id="tableFuzzyToggle" title="Toggle Fuzzy Matching on quick search">
                             <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Fuzzy Match: ON</span>
@@ -369,7 +382,7 @@
                                 <span class="badge badge-easy"><i class="fa-solid fa-bolt"></i> Live Benchmark Arena</span>
                             </div>
                             <h2>Searching Algorithms Implementation Hub</h2>
-                            <p>Interactive playground, real-time benchmarks, preprocessing table inspectors, and dynamic programming matrices for all 4 searching algorithms.</p>
+                            <p>Interactive playground, real-time benchmarks, preprocessing table inspectors, and dynamic programming matrices for all 5 searching algorithms.</p>
                         </div>
                         <div class="hub-algo-tags-grid">
                             <div class="algo-pill-card">
@@ -387,10 +400,10 @@
                                 </div>
                             </div>
                             <div class="algo-pill-card">
-                                <div class="pill-icon" style="color: #ec4899;"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                                <div class="pill-icon" style="color: #f59e0b;"><i class="fa-solid fa-network-wired"></i></div>
                                 <div>
-                                    <div class="pill-name">Levenshtein Fuzzy Search</div>
-                                    <div class="pill-meta">O(N×M) DP | Typo Tolerant</div>
+                                    <div class="pill-name">Aho-Corasick Automaton</div>
+                                    <div class="pill-meta">O(N+M+Z) | Multi-Pattern Trie</div>
                                 </div>
                             </div>
                             <div class="algo-pill-card">
@@ -398,6 +411,13 @@
                                 <div>
                                     <div class="pill-name">Boyer-Moore-Horspool</div>
                                     <div class="pill-meta">Best: O(N/M) | Bad Char Skip</div>
+                                </div>
+                            </div>
+                            <div class="algo-pill-card">
+                                <div class="pill-icon" style="color: #ec4899;"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                                <div>
+                                    <div class="pill-name">Levenshtein Fuzzy Search</div>
+                                    <div class="pill-meta">O(N×M) DP | Typo Tolerant</div>
                                 </div>
                             </div>
                         </div>
@@ -414,11 +434,14 @@
                         <button type="button" class="hub-tab" data-hub-tab="rabinkarp">
                             <i class="fa-solid fa-fingerprint"></i> Rabin-Karp Deep-Dive
                         </button>
-                        <button type="button" class="hub-tab" data-hub-tab="fuzzy">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i> Fuzzy Levenshtein DP
+                        <button type="button" class="hub-tab" data-hub-tab="ahocorasick">
+                            <i class="fa-solid fa-network-wired"></i> Aho-Corasick Deep-Dive
                         </button>
                         <button type="button" class="hub-tab" data-hub-tab="boyermoore">
                             <i class="fa-solid fa-forward-fast"></i> Boyer-Moore Deep-Dive
+                        </button>
+                        <button type="button" class="hub-tab" data-hub-tab="fuzzy">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Fuzzy Levenshtein DP
                         </button>
                         <button type="button" class="hub-tab" data-hub-tab="theory">
                             <i class="fa-solid fa-table-cells"></i> Complexity Matrix & Java Code
@@ -612,6 +635,50 @@
                         </div>
                     </div>
 
+                    <!-- HUB TAB 4: AHO-CORASICK DEEP-DIVE -->
+                    <div class="hub-tab-pane" id="hub-pane-ahocorasick">
+                        <div class="deep-dive-card">
+                            <div class="algo-header">
+                                <div class="algo-header-title">
+                                    <h3>Aho-Corasick Multi-Pattern Automaton Inspector</h3>
+                                    <p>Constructs Trie state machine with BFS failure links & output dictionaries to locate multiple keywords simultaneously across all documents in O(N + M + Z) time.</p>
+                                </div>
+                                <span class="algo-tag" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border-color: rgba(245, 158, 11, 0.3);">Time: O(N + M + Z) | Multi-Pattern</span>
+                            </div>
+
+                            <div class="form-grid">
+                                <div class="form-group full-width">
+                                    <label for="hubAcInput">Dictionary Keywords / Patterns (comma-separated):</label>
+                                    <div style="display: flex; gap: 12px;">
+                                        <input type="text" class="form-control" id="hubAcInput" placeholder="e.g. Binary Search, Tree, Deadlock, Sort, Relational, TCP" value="Binary Search, Tree, Deadlock, Sort">
+                                        <button class="btn btn-primary" id="hubAcRunBtn">
+                                            <i class="fa-solid fa-network-wired"></i> Inspect Automaton & Search
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="visualizer-box" id="hubAcTrieBox" style="margin-top: 18px;">
+                                <div class="visualizer-title" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span><i class="fa-solid fa-diagram-project"></i> Trie Automaton State Nodes & BFS Failure Transitions:</span>
+                                    <span id="hubAcStateCountBadge" class="badge badge-doc">0 States</span>
+                                </div>
+                                <div id="hubAcNodesList" class="ac-nodes-grid"></div>
+                                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 10px;">
+                                    Each node represents a prefix in the keyword dictionary. Failure pointers point to the longest proper suffix state for seamless O(1) fallback transitions.
+                                </p>
+                            </div>
+
+                            <div style="margin-top: 24px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                    <h4 style="color: var(--text-secondary); margin: 0;">Multi-Pattern Matches Across All Documents:</h4>
+                                    <span id="hubAcMatchesCount" class="badge badge-subject">0 Matches</span>
+                                </div>
+                                <div id="hubAcResultsList"></div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- HUB TAB 5: BOYER-MOORE DEEP-DIVE -->
                     <div class="hub-tab-pane" id="hub-pane-boyermoore">
                         <div class="deep-dive-card">
@@ -687,6 +754,16 @@
                                             <td>$O(1)$</td>
                                             <td>Polynomial Hash ($d=256, q=101$) with rolling update</td>
                                             <td><span class="badge badge-hard">No (Exact)</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong style="color: #f59e0b;">Aho-Corasick Automaton</strong></td>
+                                            <td>$O(M \times \Sigma)$</td>
+                                            <td>$O(N)$</td>
+                                            <td>$O(N + M + Z)$</td>
+                                            <td>$O(N + M + Z)$</td>
+                                            <td>$O(M \times \Sigma)$ (Trie + Fail)</td>
+                                            <td>Multi-Pattern Trie + BFS Failure Links + Output Dictionary</td>
+                                            <td><span class="badge badge-easy">Multi-Pattern Exact</span></td>
                                         </tr>
                                         <tr>
                                             <td><strong style="color: #06b6d4;">Boyer-Moore-Horspool</strong></td>
@@ -772,6 +849,37 @@
 
                                 <div class="code-preview-card">
                                     <div class="code-preview-header">
+                                        <span><i class="fa-brands fa-java" style="color: #f59e0b;"></i> AhoCorasick.java</span>
+                                        <span class="badge badge-unit">O(N+M+Z)</span>
+                                    </div>
+                                    <pre class="code-block"><code>public class AhoCorasick {
+    public static class Match {
+        public String pattern;
+        public int startIndex, endIndex;
+    }
+    // Constructs Trie + BFS Failure links + Output dictionaries
+    public List&lt;Match&gt; searchAll(String text) {
+        List&lt;Match&gt; results = new ArrayList&lt;&gt;();
+        Node curr = root;
+        for (int i = 0; i &lt; text.length(); i++) {
+            char c = text.charAt(i);
+            while (curr != null && !curr.next.containsKey(c) && curr != root) {
+                curr = curr.fail;
+            }
+            curr = (curr != null && curr.next.containsKey(c)) ? curr.next.get(c) : root;
+            if (curr != null && !curr.output.isEmpty()) {
+                for (String p : curr.output) {
+                    results.add(new Match(p, i - p.length() + 1, i + 1));
+                }
+            }
+        }
+        return results;
+    }
+}</code></pre>
+                                </div>
+
+                                <div class="code-preview-card">
+                                    <div class="code-preview-header">
                                         <span><i class="fa-brands fa-java" style="color: #f59e0b;"></i> Levenshtein.java</span>
                                         <span class="badge badge-unit">DP Distance</span>
                                     </div>
@@ -830,7 +938,7 @@
                     </div>
 
                     <div id="kmpResultsContainer" style="margin-top: 24px;">
-                        <h4 style="margin-bottom: 12px; color: var(--text-secondary);">Search Matches</h4>
+                        <h4 style="margin-bottom: 12px; color: var(--text-secondary);">Search Matches Across All Documents</h4>
                         <div id="kmpResultsList"></div>
                     </div>
                 </div>
@@ -867,13 +975,54 @@
                     </div>
 
                     <div id="rkResultsContainer" style="margin-top: 24px;">
-                        <h4 style="margin-bottom: 12px; color: var(--text-secondary);">Search Matches & Rolling Window Trace</h4>
+                        <h4 style="margin-bottom: 12px; color: var(--text-secondary);">Search Matches Across All Documents</h4>
                         <div id="rkResultsList"></div>
                     </div>
                 </div>
             </section>
 
-            <!-- VIEW 4: FUZZY SEARCH (LEVENSHTEIN) -->
+            <!-- VIEW 4: AHO-CORASICK MULTI-PATTERN SEARCH -->
+            <section class="view-panel" id="view-aho-corasick">
+                <div class="algo-card">
+                    <div class="algo-header">
+                        <div class="algo-header-title">
+                            <h3>Aho-Corasick Multi-Pattern Search</h3>
+                            <p>Simultaneously search for multiple keywords, phrases, or question topics across all repository documents in a single linear pass.</p>
+                        </div>
+                        <span class="algo-tag" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border-color: rgba(245, 158, 11, 0.3);">Time: O(N + M + Z) | Space: O(M × Σ)</span>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label for="acKeyword">Search Patterns / Keywords (comma-separated for multi-pattern search):</label>
+                            <div style="display: flex; gap: 12px;">
+                                <input type="text" class="form-control" id="acKeyword" placeholder="e.g. Binary Search, Deadlock, Sort, Tree, Relational, TCP" value="Binary Search, Tree, Deadlock">
+                                <button class="btn btn-primary" id="acSearchBtn">
+                                    <i class="fa-solid fa-network-wired"></i> Run Aho-Corasick
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="acAutomatonContainer" class="visualizer-box" style="margin-top: 18px; display: none;">
+                        <div class="visualizer-title" style="display: flex; justify-content: space-between; align-items: center;">
+                            <span><i class="fa-solid fa-diagram-project"></i> Automaton Trie States & BFS Failure Pointers:</span>
+                            <span id="acStateCountBadge" class="badge badge-doc">0 States</span>
+                        </div>
+                        <div id="acNodesDisplay" class="ac-nodes-grid"></div>
+                    </div>
+
+                    <div id="acResultsContainer" style="margin-top: 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <h4 style="color: var(--text-secondary); margin: 0;">Matches Found Across All Documents</h4>
+                            <span id="acResultsCountBadge" class="badge badge-subject">0 Questions</span>
+                        </div>
+                        <div id="acResultsList"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 5: FUZZY SEARCH (LEVENSHTEIN) -->
             <section class="view-panel" id="view-fuzzy-search">
                 <div class="algo-card">
                     <div class="algo-header">
